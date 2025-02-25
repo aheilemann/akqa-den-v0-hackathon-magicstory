@@ -1,4 +1,4 @@
-import { SETTING_PROMPT, CHARACTER_PROMPT, THEME_PROMPT } from "@/lib/prompts";
+import { SETTING_PROMPT, CHARACTER_PROMPT, THEME_PROMPT } from "@/lib/prompt";
 
 export const steps = [
   {
