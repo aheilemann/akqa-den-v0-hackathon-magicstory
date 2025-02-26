@@ -20,7 +20,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-black/30 w-full h-full" />
 
       {/* Content */}
-      <div className="relative z-10 text-white w-full max-w-5xl px-6 pt-24 lg:pt-0 lg:px-0">
+      <div className="relative z-10 text-white w-full max-w-5xl px-6 pt-24 lg:pt-0 xl:px-0">
         <div className="flex flex-col gap-4 items-start">
           <Badge className="w-fit">✨Powered by AI</Badge>
           <h1 className="text-3xl md:text-6xl mb-6 tracking-tighter max-w-xl">
