@@ -1,29 +1,55 @@
+"use client";
+
+import { createBrowserClient } from "@supabase/ssr";
+import { Button } from "@/components/ui/button";
+import { Database } from "@/lib/database.types";
 import { signUpAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { use } from "react";
+import { GoogleIcon } from "@/components/icons/google";
 
-export default async function Signup(props: {
-  searchParams: Promise<Message>;
-}) {
-  const searchParams = await props.searchParams;
-  if ("message" in searchParams) {
-    return (
-      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={searchParams} />
-      </div>
+export default function SignUpPage(props: { searchParams: Promise<Message> }) {
+  const searchParams = use(props.searchParams);
+
+  const handleGoogleSignIn = () => {
+    const supabase = createBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-  }
+
+    supabase.auth
+      .signInWithOAuth({
+        provider: "google",
+        options: {
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      .then(({ error }) => {
+        if (error) {
+          console.error("Error signing in with Google:", error.message);
+        }
+      });
+  };
 
   return (
-    <>
-      <form className="flex flex-col min-w-64 max-w-64 mx-auto">
+    <section className="flex-1 w-full flex flex-col my-40 mx-auto items-center justify-center">
+      <form className="flex flex-col max-w-xl w-full border border-border rounded-lg p-10">
         <h1 className="text-2xl font-medium">Sign up</h1>
-        <p className="text-sm text text-foreground">
+        <p className="text-sm text-foreground">
           Already have an account?{" "}
-          <Link className="text-primary font-medium underline" href="/sign-in">
+          <Link
+            className="text-foreground font-medium underline"
+            href="/sign-in"
+          >
             Sign in
           </Link>
         </p>
@@ -43,7 +69,26 @@ export default async function Signup(props: {
           </SubmitButton>
           <FormMessage message={searchParams} />
         </div>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <Separator />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or</span>
+          </div>
+        </div>
+
+        <Button
+          onClick={handleGoogleSignIn}
+          type="button"
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <GoogleIcon className="w-5 h-5" />
+          Sign up with Google
+        </Button>
       </form>
-    </>
+    </section>
   );
 }
