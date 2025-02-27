@@ -4,18 +4,10 @@ import { PricingCard } from "@/components/molecules/pricing-card";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { Database } from "@/lib/database.types";
 
-type SubscriptionTier = {
-  subscription_tier_id: string;
-  subscription_tier_name: string;
-  subscription_tier_description: string;
-  subscription_tier_price: number;
-  subscription_tier_features: Array<{ feature: string }>;
-  subscription_tier_story_limit: number | null;
-  subscription_tier_continuation_limit: number | null;
-  subscription_tier_created_at: string;
-  subscription_tier_updated_at: string | null;
-};
+type SubscriptionTier =
+  Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
 const textVariants = {
   hidden: { opacity: 0, y: -20 },
@@ -33,7 +25,7 @@ const textVariants = {
 export default function PricingPage() {
   const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createBrowserClient(
+  const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
@@ -41,7 +33,6 @@ export default function PricingPage() {
   useEffect(() => {
     async function fetchTiers() {
       try {
-        // Add artificial delay
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const { data, error } = await supabase
@@ -173,11 +164,11 @@ export default function PricingPage() {
               key={tier.subscription_tier_id}
               name={tier.subscription_tier_name}
               price={`$${tier.subscription_tier_price.toFixed(2)}`}
-              description={tier.subscription_tier_description}
+              description={tier.subscription_tier_description ?? ""}
               features={
-                tier.subscription_tier_features?.map(
-                  ({ feature }) => feature
-                ) ?? []
+                (
+                  tier.subscription_tier_features as Array<{ feature: string }>
+                )?.map(({ feature }) => feature) ?? []
               }
               isPremium={index === 1}
               index={index}

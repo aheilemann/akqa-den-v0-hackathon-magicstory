@@ -8,6 +8,10 @@ import {
 } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { Database } from "@/lib/database.types";
+
+type SubscriptionTier =
+  Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
 export type PricingTierProps = {
   name: string;
