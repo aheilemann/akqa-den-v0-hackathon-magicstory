@@ -99,17 +99,25 @@ const Hero = () => {
         <Canvas
           camera={{ position: [0, 0, viewport.width < 768 ? 3 : 5], fov: 50 }}
         >
-          {/* Environment and lighting */}
-          <Environment preset="city" />
+          <Environment preset="studio" blur={0.8} />
+
+          {/* Subtle front ambient light */}
           <ambientLight intensity={0.5} />
+
+          {/* Main backlight */}
           <spotLight
-            position={[10, 10, 10]}
-            angle={0.15}
+            position={[0, 5, -200]}
+            angle={0.5}
             penumbra={1}
-            intensity={1}
+            intensity={2}
             castShadow
           />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} />
+
+          {/* Top rim light */}
+          <pointLight position={[0, 8, -10]} intensity={0.5} color="#6b7280" />
+
+          {/* Subtle side fill light */}
+          <pointLight position={[-5, 0, -4]} intensity={0.5} color="#4b5563" />
 
           {starsConfig.map((config, index) => (
             <SparkleModel
