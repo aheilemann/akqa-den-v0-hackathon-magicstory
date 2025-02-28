@@ -41,18 +41,22 @@ export default function SignUpPage(props: { searchParams: Promise<Message> }) {
   };
 
   return (
-    <section className="flex-1 w-full flex flex-col my-40 mx-auto items-center justify-center">
-      <form className="flex flex-col max-w-xl w-full border border-border rounded-lg p-10">
-        <h1 className="text-2xl font-medium">Sign up</h1>
-        <p className="text-sm text-foreground">
-          Already have an account?{" "}
-          <Link
-            className="text-foreground font-medium underline"
-            href="/sign-in"
-          >
-            Sign in
-          </Link>
-        </p>
+    <section className="flex-1 w-full flex flex-col mt-12 mb-40 mx-auto items-center justify-center px-4">
+      <form className="flex flex-col max-w-lg w-full border border-border rounded-lg p-10">
+        <div className="flex flex-col gap-2 items-center">
+          <h1 className="text-3xl tracking-tighter font-medium text-center">
+            Sign up and get started
+          </h1>
+          <p className="text-md text-muted-foreground text-center">
+            Already have an account?{" "}
+            <Link
+              className="text-foreground font-medium underline"
+              href="/sign-in"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" required />
