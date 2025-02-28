@@ -4,6 +4,8 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Database } from "@/lib/database.types";
+
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -131,4 +133,45 @@ export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
+};
+
+export type SubscriptionTier =
+  Database["public"]["Tables"]["subscription_tiers"]["Row"];
+
+export async function fetchTiers() {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("subscription_tiers")
+      .select("*")
+      .order("subscription_tier_price");
+
+    if (error) throw error;
+    return data as SubscriptionTier[];
+  } catch (error) {
+    console.error("Error fetching tiers:", error);
+    return [];
+  }
+}
+
+export const handleGoogleSignIn = async () => {
+  const supabase = await createClient();
+
+  supabase.auth
+    .signInWithOAuth({
+      provider: "google",
+      options: {
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent"
+        },
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    .then(({ error }) => {
+      if (error) {
+        console.error("Error signing in with Google:", error.message);
+      }
+    });
 };
