@@ -9,6 +9,7 @@ import { createStoryPrompt } from "@/lib/prompt/story";
 import { type Story, type StoryConfig } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import { clearAllStoryFlowData } from "@/utils/storage/story-creation-storage";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
@@ -21,51 +22,51 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [generatingImages, setGeneratingImages] = useState(false);
 
-  // const generateAllImages = useCallback(async () => {
-  //   if (!story) return;
-  //   setGeneratingImages(true);
-  //
-  //   try {
-  //     // const imagePromises = story.pages.map(
-  //     //   async (page: { imagePrompt: string }, index: number) => {
-  //     //     const response = await fetch("/api/generate-image", {
-  //     //       method: "POST",
-  //     //       headers: { "Content-Type": "application/json" },
-  //     //       body: JSON.stringify({ prompt: page.imagePrompt }),
-  //     //     });
-  //     //
-  //     //     if (!response.ok)
-  //     //       throw new Error(`Failed to generate image ${index + 1}`);
-  //     //
-  //     //     const data = await response.json();
-  //     //     return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-  //     //   },
-  //     // );
-  //     //
-  //     // const results = await Promise.all(imagePromises);
-  //
-  //     setStory((prev: Story | null) => {
-  //       if (!prev) return prev;
-  //       const newPages = [...prev.pages];
-  //       // results.forEach(
-  //       //   ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
-  //       //     newPages[index] = { ...newPages[index], imageUrl };
-  //       //   },
-  //       // );
-  //       return { ...prev, pages: newPages };
-  //     });
-  //   } catch (error) {
-  //     console.error("Error generating images:", error);
-  //   } finally {
-  //     setGeneratingImages(false);
-  //   }
-  // }, [story]);
+  const generateAllImages = useCallback(async () => {
+    if (!story) return;
+    setGeneratingImages(true);
 
-  // useEffect(() => {
-  //   if (story && !generatingImages) {
-  //     generateAllImages();
-  //   }
-  // }, [story, generatingImages, generateAllImages]);
+    try {
+      //     // const imagePromises = story.pages.map(
+      //     //   async (page: { imagePrompt: string }, index: number) => {
+      //     //     const response = await fetch("/api/generate-image", {
+      //     //       method: "POST",
+      //     //       headers: { "Content-Type": "application/json" },
+      //     //       body: JSON.stringify({ prompt: page.imagePrompt }),
+      //     //     });
+      //     //
+      //     //     if (!response.ok)
+      //     //       throw new Error(`Failed to generate image ${index + 1}`);
+      //     //
+      //     //     const data = await response.json();
+      //     //     return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+      //     //   },
+      //     // );
+      //     //
+      //     // const results = await Promise.all(imagePromises);
+      //
+      setStory((prev: Story | null) => {
+        if (!prev) return prev;
+        const newPages = [...prev.pages];
+        // results.forEach(
+        //   ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
+        //     newPages[index] = { ...newPages[index], imageUrl };
+        //   },
+        // );
+        return { ...prev, pages: newPages };
+      });
+    } catch (error) {
+      console.error("Error generating images:", error);
+    } finally {
+      setGeneratingImages(false);
+    }
+  }, [story]);
+
+  useEffect(() => {
+    if (story && !generatingImages) {
+      generateAllImages();
+    }
+  }, [story, generatingImages, generateAllImages]);
 
   const generateStory = async () => {
     try {
@@ -95,6 +96,7 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
       console.error("Error generating story:", err);
     } finally {
       setIsLoading(false);
+      clearAllStoryFlowData();
     }
   };
 
