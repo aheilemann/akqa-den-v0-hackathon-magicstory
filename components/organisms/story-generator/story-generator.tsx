@@ -21,51 +21,51 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [generatingImages, setGeneratingImages] = useState(false);
 
-  const generateAllImages = useCallback(async () => {
-    if (!story) return;
-    setGeneratingImages(true);
+  // const generateAllImages = useCallback(async () => {
+  //   if (!story) return;
+  //   setGeneratingImages(true);
+  //
+  //   try {
+  //     // const imagePromises = story.pages.map(
+  //     //   async (page: { imagePrompt: string }, index: number) => {
+  //     //     const response = await fetch("/api/generate-image", {
+  //     //       method: "POST",
+  //     //       headers: { "Content-Type": "application/json" },
+  //     //       body: JSON.stringify({ prompt: page.imagePrompt }),
+  //     //     });
+  //     //
+  //     //     if (!response.ok)
+  //     //       throw new Error(`Failed to generate image ${index + 1}`);
+  //     //
+  //     //     const data = await response.json();
+  //     //     return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+  //     //   },
+  //     // );
+  //     //
+  //     // const results = await Promise.all(imagePromises);
+  //
+  //     setStory((prev: Story | null) => {
+  //       if (!prev) return prev;
+  //       const newPages = [...prev.pages];
+  //       // results.forEach(
+  //       //   ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
+  //       //     newPages[index] = { ...newPages[index], imageUrl };
+  //       //   },
+  //       // );
+  //       return { ...prev, pages: newPages };
+  //     });
+  //   } catch (error) {
+  //     console.error("Error generating images:", error);
+  //   } finally {
+  //     setGeneratingImages(false);
+  //   }
+  // }, [story]);
 
-    try {
-      const imagePromises = story.pages.map(
-        async (page: { imagePrompt: string }, index: number) => {
-          const response = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: page.imagePrompt }),
-          });
-
-          if (!response.ok)
-            throw new Error(`Failed to generate image ${index + 1}`);
-
-          const data = await response.json();
-          return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-        },
-      );
-
-      const results = await Promise.all(imagePromises);
-
-      setStory((prev: Story | null) => {
-        if (!prev) return prev;
-        const newPages = [...prev.pages];
-        results.forEach(
-          ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
-            newPages[index] = { ...newPages[index], imageUrl };
-          },
-        );
-        return { ...prev, pages: newPages };
-      });
-    } catch (error) {
-      console.error("Error generating images:", error);
-    } finally {
-      setGeneratingImages(false);
-    }
-  }, [story]);
-
-  useEffect(() => {
-    if (story && !generatingImages) {
-      generateAllImages();
-    }
-  }, [story, generatingImages, generateAllImages]);
+  // useEffect(() => {
+  //   if (story && !generatingImages) {
+  //     generateAllImages();
+  //   }
+  // }, [story, generatingImages, generateAllImages]);
 
   const generateStory = async () => {
     try {
@@ -73,6 +73,7 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
       setError(null);
 
       const prompt = createStoryPrompt(settings);
+      console.log("Prompt", JSON.stringify(prompt));
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
@@ -136,22 +137,22 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image side */}
           <div className="relative aspect-square w-full">
-            {story.pages[currentPage].imageUrl ? (
-              <Image
-                src={story.pages[currentPage].imageUrl}
-                alt={`Story illustration ${currentPage + 1}`}
-                fill
-                className="object-cover rounded-lg"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full relative">
-                <Skeleton className="absolute inset-0 rounded-lg" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
+            {/* {story.pages[currentPage].imageUrl ? ( */}
+            {/*   <Image */}
+            {/*     src={story.pages[currentPage].imageUrl} */}
+            {/*     alt={`Story illustration ${currentPage + 1}`} */}
+            {/*     fill */}
+            {/*     className="object-cover rounded-lg" */}
+            {/*     priority */}
+            {/*   /> */}
+            {/* ) : ( */}
+            <div className="w-full h-full relative">
+              <Skeleton className="absolute inset-0 rounded-lg" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            )}
+            </div>
+            {/* )} */}
           </div>
 
           {/* Text side */}
