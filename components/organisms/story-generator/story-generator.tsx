@@ -9,7 +9,6 @@ import { createStoryPrompt } from "@/lib/prompt/story";
 import { type Story, type StoryConfig } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { clearAllStoryFlowData } from "@/utils/storage/story-creation-storage";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
@@ -23,6 +22,7 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [imagesFetched, setImagesFetched] = useState(false);
 
   const generateAllImages = useCallback(async () => {
     if (!story) return;
@@ -67,15 +67,16 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
     } catch (error) {
       console.error("Error generating images:", error);
     } finally {
+      setImagesFetched(true);
       setGeneratingImages(false);
     }
   }, [story]);
 
   useEffect(() => {
-    if (story && !generatingImages) {
+    if (story && !generatingImages && !imagesFetched) {
       generateAllImages();
     }
-  }, [story, generatingImages, generateAllImages]);
+  }, [imagesFetched, generateAllImages]);
 
   const generateStory = async () => {
     try {
