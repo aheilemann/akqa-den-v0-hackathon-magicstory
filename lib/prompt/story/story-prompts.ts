@@ -16,7 +16,7 @@ ${settings.theme.description}
 
 Please create a story with the following structure:
 1. A title for the story
-2. 6-8 pages of content, where each page should:
+2. ONLY 2 pages of content, where each page should:
    - Have 2-3 sentences of story text appropriate for young children
    - Include a detailed image prompt that matches the setting's visual style
 3. A target age range for the story

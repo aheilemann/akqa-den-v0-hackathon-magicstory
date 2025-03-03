@@ -15,38 +15,48 @@ interface StoryGeneratorProps {
 }
 
 const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
+  const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
+
   const [error, setError] = useState<string | null>(null);
   const [story, setStory] = useState<Story | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [imagesFetched, setImagesFetched] = useState(false);
 
   const generateAllImages = useCallback(async () => {
     if (!story) return;
     setGeneratingImages(true);
 
     try {
-      const imagePromises = story.pages.map(
-        async (page: { imagePrompt: string }, index: number) => {
-          const response = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: page.imagePrompt }),
-          });
+      let results;
+      if (!USE_STATIC_STORY) {
+        const imagePromises = story.pages.map(
+          async (page: { imagePrompt: string }, index: number) => {
+            const response = await fetch("/api/generate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: page.imagePrompt }),
+            });
+            if (!response.ok)
+              throw new Error(`Failed to generate image ${index + 1}`);
+            const data = await response.json();
+            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+          },
+        );
 
-          if (!response.ok)
-            throw new Error(`Failed to generate image ${index + 1}`);
-
-          const data = await response.json();
-          return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-        },
-      );
-
-      const results = await Promise.all(imagePromises);
+        results = await Promise.all(imagePromises);
+      } else {
+        results = [
+          { index: 0, imageUrl: "Static - Test Image Text #1" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" },
+        ];
+      }
 
       setStory((prev: Story | null) => {
         if (!prev) return prev;
         const newPages = [...prev.pages];
+
         results.forEach(
           ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
             newPages[index] = { ...newPages[index], imageUrl };
@@ -57,15 +67,16 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
     } catch (error) {
       console.error("Error generating images:", error);
     } finally {
+      setImagesFetched(true);
       setGeneratingImages(false);
     }
   }, [story]);
 
   useEffect(() => {
-    if (story && !generatingImages) {
+    if (story && !generatingImages && !imagesFetched) {
       generateAllImages();
     }
-  }, [story, generatingImages, generateAllImages]);
+  }, [imagesFetched, generateAllImages]);
 
   const generateStory = async () => {
     try {
@@ -125,7 +136,6 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
       </Card>
     );
   }
-
   if (story) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -137,13 +147,19 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
           {/* Image side */}
           <div className="relative aspect-square w-full">
             {story.pages[currentPage].imageUrl ? (
-              <Image
-                src={story.pages[currentPage].imageUrl}
-                alt={`Story illustration ${currentPage + 1}`}
-                fill
-                className="object-cover rounded-lg"
-                priority
-              />
+              <div>
+                {USE_STATIC_STORY ? (
+                  <p>{story.pages[currentPage].imageUrl}</p>
+                ) : (
+                  <Image
+                    src={story.pages[currentPage].imageUrl}
+                    alt={`Story illustration ${currentPage + 1}`}
+                    fill
+                    className="object-cover rounded-lg"
+                    priority
+                  />
+                )}
+              </div>
             ) : (
               <div className="w-full h-full relative">
                 <Skeleton className="absolute inset-0 rounded-lg" />

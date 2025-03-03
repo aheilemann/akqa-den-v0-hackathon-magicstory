@@ -8,6 +8,7 @@ import { StoryGenerator } from "@/components/organisms/story-generator";
 import { type StoryConfig, type Option } from "@/lib/types";
 import { staticStory } from "@/lib/prompt/story/staticStory";
 import { steps } from "./story-builder.mocks";
+import { OptionsStatic } from "@/components/molecules/options-static";
 
 type PartialStoryConfig = {
   setting?: Option;
@@ -17,11 +18,13 @@ type PartialStoryConfig = {
 
 const StoryBuilder = () => {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
+  const USE_STATIC_OPTIONS =
+    process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
 
   useEffect(() => {
-    if (USE_STATIC_STORY) {
+    if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
     }
   }, [USE_STATIC_STORY]);
@@ -78,13 +81,25 @@ const StoryBuilder = () => {
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <OptionsGenerator
-            prompt={currentStepData.prompt}
-            onSelect={(option) => handleSelect(currentStepData.key, option)}
-            selectedOption={
-              settings[currentStepData.key as keyof PartialStoryConfig] ?? null
-            }
-          />
+          {USE_STATIC_OPTIONS ? (
+            <OptionsStatic
+              options={currentStepData.options}
+              onSelect={(option) => handleSelect(currentStepData.key, option)}
+              selectedOption={
+                settings[currentStepData.key as keyof PartialStoryConfig] ??
+                null
+              }
+            />
+          ) : (
+            <OptionsGenerator
+              prompt={currentStepData.prompt}
+              onSelect={(option) => handleSelect(currentStepData.key, option)}
+              selectedOption={
+                settings[currentStepData.key as keyof PartialStoryConfig] ??
+                null
+              }
+            />
+          )}
         </motion.div>
       </AnimatePresence>
 

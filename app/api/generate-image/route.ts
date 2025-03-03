@@ -7,31 +7,39 @@ export const runtime = "edge";
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
+    if (process.env.DISABLE_IMAGE_GENERATION === "true") {
+      return new Response(
+        JSON.stringify({ error: "Image generation is disabled" }),
+        {
+          status: 400
+        }
+      );
+    }
 
     const { image } = await generateImage({
       model: openai.image("dall-e-3"),
       prompt,
       size: "1024x1024",
       providerOptions: {
-        openai: { quality: "standard", style: "natural" },
+        openai: { quality: "standard", style: "natural" }
       },
-      n: 1,
+      n: 1
     });
 
     return new Response(
       JSON.stringify({
         base64: image.base64,
-        data: image.uint8Array,
+        data: image.uint8Array
       }),
       {
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { "Content-Type": "application/json" }
+      }
     );
   } catch (error) {
     console.error("Error generating image:", error);
     return new Response(JSON.stringify({ error: "Failed to generate image" }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" }
     });
   }
 }
