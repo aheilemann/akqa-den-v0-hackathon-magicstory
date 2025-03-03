@@ -6,6 +6,10 @@ export interface CreateStoryFlowData {
   type: string;
 }
 
+export interface CreateStoryStorageData {
+  data: string | string[];
+}
+
 export const setStoryDataItem = (
   key: keyof CreateStoryFlowData,
   value: string | string[],
@@ -34,7 +38,7 @@ export const getStoryDataItem = (
     } catch (e) {
       console.log(e);
 
-      return `${item}`;
+      return item.toString();
     }
   }
   return "";
@@ -54,13 +58,13 @@ export const getAllStoryDataAsStoryConfig = (): StoryConfig | null => {
   const storyConfig: StoryConfig = {
     theme: {
       name: theme,
-      description: subThemes.toString(),
+      description: `"${subThemes.join(",")}"`,
       emoji: "",
       example: "",
     },
     character: {
       name: "Generate name which fits the character description",
-      description: character.toString(),
+      description: `${character}`,
       emoji: "",
       traits: ["Generate traits which fits the character description"],
     },
@@ -69,7 +73,7 @@ export const getAllStoryDataAsStoryConfig = (): StoryConfig | null => {
       description:
         "Generate description that fits the theme and character of the story",
       emoji: "",
-      visualStyle: type,
+      visualStyle: `${type}`,
     },
   };
 

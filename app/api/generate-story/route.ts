@@ -8,16 +8,14 @@ export async function POST(req: Request) {
     const { prompt } = await req.json();
 
     const response = await generateText({
-      // model: openai("gpt-4"),
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-4"),
       prompt,
       temperature: 0.7,
       maxTokens: 2000,
     });
 
     // Parse the response text as JSON since it should be in our Story format
-    console.log("Response:", response.text);
-    const storyData = response.text;
+    const storyData = JSON.parse(response.text);
 
     return new Response(JSON.stringify(storyData), {
       headers: { "Content-Type": "application/json" },

@@ -16,31 +16,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { KeyboardEvent, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const FormSchema = z.object({
   type: z.string().min(2, {
     message: "Please select your story type.",
   }),
-  // subthemes: z.array(z.string()).refine((value) => value.some((item) => item), {
-  //   message: "You have to select at least one item.",
-  // }),
 });
 
 const StoryTypeForm = () => {
   const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    // defaultValues: {
-    //   items: ["Dark", "Fun"],
-    // },
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log("onSubmit:", data);
-    toast.success("You submitted the following values:");
-
     setStoryDataItem("type", data.type);
     router.replace("/create/your-story");
   };

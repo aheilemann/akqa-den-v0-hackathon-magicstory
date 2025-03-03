@@ -21,7 +21,6 @@ import { icons } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { KeyboardEvent, memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const FormSchema = z.object({
@@ -40,33 +39,25 @@ const StoryThemeForm = memo(() => {
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    // defaultValues: {
-    //   items: ["Dark", "Fun"],
-    // },
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     if (!subThemes) {
       return;
     }
-    console.log("onSubmit:", data);
-    console.log("Subthemes", subThemes);
-    toast.success("You submitted the following values:");
-
     setStoryDataItem("subtheme", subThemes);
     setStoryDataItem("theme", data.mainThemes);
 
     router.push("/create/choose-character");
   };
+
   const checkKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      console.log(focusedElement);
     }
   };
 
   const getLocalThemes = () => {
-    console.log("Get the localstorage maintheme");
     try {
       const localMainTheme = getStoryDataItem("theme") as string;
       if (localMainTheme) {
@@ -76,7 +67,6 @@ const StoryThemeForm = memo(() => {
       console.error("Error getting subthemes from local storage:", e);
     }
 
-    console.log("Get the localstorage subthemes");
     try {
       const localSubthemes = getStoryDataItem("subtheme") as string[];
       if (localSubthemes) {
@@ -99,9 +89,6 @@ const StoryThemeForm = memo(() => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8"
         onKeyDown={(e) => checkKeyDown(e)}
-        onError={() => {
-          console.log("error");
-        }}
       >
         <FormField
           control={form.control}

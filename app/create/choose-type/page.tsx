@@ -1,4 +1,3 @@
-"use client";
 import { StoryTypeForm } from "@/components/organisms/story-type-form";
 
 const ChooseTypePage = () => {

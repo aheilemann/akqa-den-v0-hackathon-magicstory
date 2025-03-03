@@ -13,11 +13,9 @@ import {
   setStoryDataItem,
 } from "@/utils/storage/story-creation-storage";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { get } from "http";
 import { useRouter } from "next/navigation";
 import { KeyboardEvent, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const FormSchema = z.object({
@@ -34,15 +32,9 @@ const StoryCharacterForm = () => {
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    // defaultValues: {
-    //   items: ["Dark", "Fun"],
-    // },
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log("onSubmit:", data);
-    toast.success("You submitted the following values:");
-
     setStoryDataItem("character", data.character);
     router.push("/create/choose-type");
   };
@@ -76,9 +68,6 @@ const StoryCharacterForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8"
         onKeyDown={(e) => checkKeyDown(e)}
-        onError={() => {
-          console.log("error");
-        }}
       >
         <FormField
           control={form.control}

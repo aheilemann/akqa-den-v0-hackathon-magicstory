@@ -1,5 +1,3 @@
-"use client";
-
 import { StoryThemeForm } from "@/components/organisms/story-theme-form";
 
 const ChooseThemePage = () => {

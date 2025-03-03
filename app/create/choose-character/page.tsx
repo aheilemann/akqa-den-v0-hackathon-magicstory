@@ -1,5 +1,3 @@
-"use client";
-
 import { StoryCharacterForm } from "@/components/organisms/story-character-form";
 
 const ChooseCharacter = () => {
