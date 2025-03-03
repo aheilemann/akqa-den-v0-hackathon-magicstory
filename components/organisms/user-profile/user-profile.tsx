@@ -56,7 +56,6 @@ export function UserProfile({ user }: UserProfileProps) {
 
       if (data && data.user) {
         setCurrentUser(data.user);
-        console.log(data.user);
       }
     } catch (error) {
       console.error("Error:", error);
