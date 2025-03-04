@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import { StoryViewer } from "@/components/organisms/story-viewer/story-viewer";
 import type { Story } from "@/components/organisms/story-list/story-list";
+import { use } from "react";
 
 export const revalidate = 0;
 
@@ -26,8 +27,9 @@ async function getStory(id: string) {
   };
 }
 
-export default async function StoryPage({ params }: { params: { id: string } }) {
-  const data = await getStory(params.id);
+export default async function StoryPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const data = await getStory(resolvedParams.id);
 
   if (!data) {
     notFound();

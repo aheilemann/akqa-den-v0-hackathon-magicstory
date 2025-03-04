@@ -59,7 +59,7 @@ export function StoryList({ stories }: StoryListProps) {
   return (
     <motion.div variants={storiesContainer}>
       {/* TODO: Add pagination and infinite scroll to load more stories */}
-      <h3 className="text-lg  font-medium tracking-tight mb-4">Stories {"(" + stories.length + ")"}</h3>
+      <h3 className="text-lg font-medium tracking-tight mb-4">Stories {"(" + stories.length + ")"}</h3>
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {stories.map((story) => (
           <StoryCard key={story.story_id} story={story} />
