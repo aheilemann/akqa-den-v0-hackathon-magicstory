@@ -7,38 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { createBrowserClient } from "@supabase/ssr";
 import { Button } from "@/components/ui/button";
-import { Database } from "@/lib/database.types";
 import { use } from "react";
 import { GoogleIcon } from "@/components/icons/google";
+import { handleGoogleSignIn } from "@/app/actions";
 
 export default function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = use(props.searchParams);
-
-  const handleGoogleSignIn = () => {
-    const supabase = createBrowserClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
-    supabase.auth
-      .signInWithOAuth({
-        provider: "google",
-        options: {
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-      .then(({ error }) => {
-        if (error) {
-          console.error("Error signing in with Google:", error.message);
-        }
-      });
-  };
 
   return (
     <section className="flex-1 w-full flex flex-col mt-12 mb-40 mx-auto items-center justify-center px-4 lg:px-0">

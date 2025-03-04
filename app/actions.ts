@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Database } from "@/lib/database.types";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -12,11 +13,7 @@ export const signUpAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required"
-    );
+    return encodedRedirect("error", "/sign-up", "Email and password are required");
   }
 
   const { error } = await supabase.auth.signUp({
@@ -31,11 +28,7 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
+    return encodedRedirect("success", "/sign-up", "Thanks for signing up! Please check your email for a verification link.");
   }
 };
 
@@ -72,22 +65,14 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.message);
-    return encodedRedirect(
-      "error",
-      "/forgot-password",
-      "Could not reset password"
-    );
+    return encodedRedirect("error", "/forgot-password", "Could not reset password");
   }
 
   if (callbackUrl) {
     return redirect(callbackUrl);
   }
 
-  return encodedRedirect(
-    "success",
-    "/forgot-password",
-    "Check your email for a link to reset your password."
-  );
+  return encodedRedirect("success", "/forgot-password", "Check your email for a link to reset your password.");
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
@@ -97,19 +82,11 @@ export const resetPasswordAction = async (formData: FormData) => {
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!password || !confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Password and confirm password are required"
-    );
+    encodedRedirect("error", "/protected/reset-password", "Password and confirm password are required");
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Passwords do not match"
-    );
+    encodedRedirect("error", "/protected/reset-password", "Passwords do not match");
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -117,11 +94,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Password update failed"
-    );
+    encodedRedirect("error", "/protected/reset-password", "Password update failed");
   }
 
   encodedRedirect("success", "/protected/reset-password", "Password updated");
@@ -131,4 +104,43 @@ export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
+};
+
+export type SubscriptionTier = Database["public"]["Tables"]["subscription_tiers"]["Row"];
+
+export async function fetchTiers() {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.from("subscription_tiers").select("*").order("subscription_tier_price");
+
+    if (error) throw error;
+    return data as SubscriptionTier[];
+  } catch (error) {
+    console.error("Error fetching tiers:", error);
+    return [];
+  }
+}
+
+export const handleGoogleSignIn = async () => {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    console.error("Error signing in with Google:", error.message);
+    return encodedRedirect("error", "/sign-in", error.message);
+  }
+
+  return redirect(data.url);
 };
