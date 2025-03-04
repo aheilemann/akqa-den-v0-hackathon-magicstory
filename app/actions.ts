@@ -383,3 +383,23 @@ export async function fetchStoriesByUserId(userId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function getStoryById(id: string) {
+  const supabase = await createClient();
+
+  // Get story with all required fields
+  const { data: story } = await supabase.from("stories").select("*").eq("story_id", id).single();
+
+  if (!story) {
+    return null;
+  }
+
+  return {
+    story_id: story.story_id,
+    story_title: story.story_title,
+    story_content: story.story_content,
+    story_created_at: story.story_created_at,
+    story_updated_at: story.story_updated_at,
+    story_user_id: story.story_user_id,
+  };
+}

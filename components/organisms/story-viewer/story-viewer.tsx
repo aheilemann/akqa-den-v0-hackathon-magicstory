@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -11,10 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type StoryViewerProps = {
   story: Story;
-  isOwner: boolean;
 };
 
-export function StoryViewer({ story, isOwner }: StoryViewerProps) {
+export function StoryViewer({ story }: StoryViewerProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const content = story.story_content;
   const pages = content.pages || [];
@@ -37,14 +36,6 @@ export function StoryViewer({ story, isOwner }: StoryViewerProps) {
       <div className="container max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          {isOwner && (
-            <Link href="/profile">
-              <Button variant="ghost" size="sm" className="mb-4">
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Back to Profile
-              </Button>
-            </Link>
-          )}
           <h1 className="text-4xl font-bold tracking-tight mb-2">{story.story_title}</h1>
           <p className="text-muted-foreground">{content.summary}</p>
         </div>
