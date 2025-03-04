@@ -1,3 +1,11 @@
+export const TARGET_AGE_PROMPT = `Generate 3 unique and imaginative settings for a children's story.
+For each setting include:
+- name: The target age. 
+- emoji: A single appropriate emoji
+- value: The range value of the target age. 
+
+Format as JSON array. Make them whimsical and appealing to children aged 5-12.`;
+
 export const SETTING_PROMPT = `Generate 3 unique and imaginative settings for a children's story.
 For each setting include:
 - name: A short, catchy name

@@ -1,11 +1,24 @@
-import { SETTING_PROMPT, CHARACTER_PROMPT, THEME_PROMPT } from "@/lib/prompt";
+import {
+  SETTING_PROMPT,
+  CHARACTER_PROMPT,
+  THEME_PROMPT,
+  TARGET_AGE_PROMPT,
+} from "@/lib/prompt";
 import {
   storyCharacterOptions,
   storySettingOptions,
+  storyTargetAgeOptions,
   storyThemeOptions,
 } from "@/utils/story-options";
 
 export const steps = [
+  {
+    title: "Choose Your Target Age",
+    description: "What should be your taget age for your story?",
+    prompt: TARGET_AGE_PROMPT,
+    options: storyTargetAgeOptions,
+    key: "target_age",
+  },
   {
     title: "Choose Your Story Setting",
     description: "Where will your adventure take place?",
