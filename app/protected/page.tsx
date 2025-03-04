@@ -1,4 +1,3 @@
-import { Hero } from "@/components/organisms/hero";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 

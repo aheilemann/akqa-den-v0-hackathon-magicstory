@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User } from "@supabase/supabase-js";
-import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,30 +11,31 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PencilIcon, UploadIcon } from "lucide-react";
-import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { updateProfileDisplayName, uploadProfileAvatar } from "@/app/actions";
+import type { ProfileData } from "@/app/actions";
 
 type ProfileEditorProps = {
-  user: User;
-  displayName: string;
-  avatarUrl?: string;
-  onProfileUpdate: () => void;
+  profileData: ProfileData;
+  onProfileUpdate: () => Promise<void>;
 };
 
 export function ProfileEditor({
-  user,
-  displayName: initialDisplayName,
-  avatarUrl: initialAvatarUrl,
+  profileData,
   onProfileUpdate,
 }: ProfileEditorProps) {
-  const [displayName, setDisplayName] = useState(initialDisplayName || "");
-  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || "");
+  const user = profileData.user;
+  const displayName = user.user_metadata?.display_name || "";
+  const avatarUrl =
+    user.user_metadata?.profile_img || user.user_metadata?.avatar_url;
+
+  const [newDisplayName, setNewDisplayName] = useState(displayName);
+  const [newAvatarUrl, setNewAvatarUrl] = useState(avatarUrl || "");
   const [isUploading, setIsUploading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createClient();
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -47,46 +46,21 @@ export function ProfileEditor({
 
       setIsUploading(true);
       const file = files[0];
-      const fileExt = file.name.split(".").pop();
 
-      // Simplify the path structure - just use the user ID as the filename
-      const filePath = `${user.id}.${fileExt}`;
+      const result = await uploadProfileAvatar(file);
 
-      // Upload the file to the "avatars" bucket in Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, {
-          upsert: true, // This will overwrite if the file already exists
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get the public URL from the "avatars" bucket
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-      if (data) {
-        const publicUrl = data.publicUrl;
-        setAvatarUrl(publicUrl);
-
-        // Update the user's profile_img in their metadata immediately
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: {
-            profile_img: publicUrl,
-            updated_at: new Date().toISOString(),
-          },
-        });
-
-        if (updateError) throw updateError;
-
-        toast.success("Avatar updated", {
-          description:
-            "Your new profile picture has been uploaded successfully.",
-          duration: 4000,
-        });
-
-        // Refresh the profile to show the new avatar everywhere
-        onProfileUpdate();
+      if (!result.success) {
+        throw new Error("Failed to upload avatar");
       }
+
+      setNewAvatarUrl(result.url);
+      toast.success("Avatar updated", {
+        description: "Your new profile picture has been uploaded successfully.",
+        duration: 4000,
+      });
+
+      // Refresh the profile to show the new avatar everywhere
+      await onProfileUpdate();
     } catch (error) {
       console.error("Error uploading avatar:", error);
       toast.error("Upload failed", {
@@ -103,22 +77,18 @@ export function ProfileEditor({
     try {
       setIsUpdating(true);
 
-      // Update user data using the auth.updateUser method
-      const { error: displayNameError } = await supabase.auth.updateUser({
-        data: {
-          display_name: displayName,
-          updated_at: new Date().toISOString(),
-        },
-      });
+      const result = await updateProfileDisplayName(newDisplayName);
 
-      if (displayNameError) throw displayNameError;
+      if (!result.success) {
+        throw new Error("Failed to update profile");
+      }
 
-      toast.success(`Hello, ${displayName || "there"}!`, {
+      toast.success(`Hello, ${newDisplayName || "there"}!`, {
         description: "Your profile has been updated successfully.",
         duration: 4000,
       });
 
-      onProfileUpdate();
+      await onProfileUpdate();
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -152,12 +122,12 @@ export function ProfileEditor({
             <div className="relative">
               <Avatar className="h-28 w-28 md:h-24 md:w-24">
                 <AvatarImage
-                  src={avatarUrl}
-                  alt={displayName}
+                  src={newAvatarUrl}
+                  alt={newDisplayName}
                   className="object-cover object-center"
                 />
                 <AvatarFallback>
-                  {displayName?.charAt(0) || user.email?.charAt(0)}
+                  {newDisplayName?.charAt(0) || user.email?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <Button
@@ -189,8 +159,8 @@ export function ProfileEditor({
             </label>
             <Input
               id="displayName"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              value={newDisplayName}
+              onChange={(e) => setNewDisplayName(e.target.value)}
               placeholder="Enter your display name"
             />
           </div>

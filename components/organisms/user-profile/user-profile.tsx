@@ -1,72 +1,38 @@
 "use client";
 
-import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { signOutAction } from "@/app/actions";
-import { CalendarDays, Mail, MapPin, Sparkles } from "lucide-react";
+import { signOutAction, fetchProfileData } from "@/app/actions";
+import { CalendarDays, Mail, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { StoryList } from "@/components/organisms/story-list";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ProfileEditor } from "./profile-editor";
 import { SubscriptionTier } from "@/components/molecules/subscription-tier";
 import Link from "next/link";
-import { Progress } from "@/components/ui/progress";
-import type { Database } from "@/lib/database.types";
+import type { ProfileData } from "@/app/actions";
 
 type UserProfileProps = {
-  user: User;
+  initialProfileData: ProfileData;
+  isPersonalProfile?: boolean;
 };
 
-// Mock subscription data - replace with real data later
-const mockSubscription: Database["public"]["Tables"]["subscription_tiers"]["Row"] =
-  {
-    subscription_tier_id: "pro",
-    subscription_tier_name: "Pro",
-    subscription_tier_description: "Advanced features for power users",
-    subscription_tier_price: 9.99,
-    subscription_tier_story_limit: 50,
-    subscription_tier_continuation_limit: 100,
-    subscription_tier_features: ["Unlimited stories", "Priority support"],
-    subscription_tier_created_at: null,
-    subscription_tier_updated_at: null,
-  };
+export function UserProfile({
+  initialProfileData,
+  isPersonalProfile = true,
+}: UserProfileProps) {
+  const [profileData, setProfileData] =
+    useState<ProfileData>(initialProfileData);
 
-// Mock usage data - replace with real data later
-const mockUsage = {
-  used: 15,
-  total: mockSubscription.subscription_tier_story_limit || 50,
-};
-
-export function UserProfile({ user }: UserProfileProps) {
-  const [currentUser, setCurrentUser] = useState<User>(user);
-  const supabase = createClient();
-
-  const fetchProfile = async () => {
-    try {
-      // Get the latest user data
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error("Error fetching user:", error);
-        return;
-      }
-
-      if (data && data.user) {
-        setCurrentUser(data.user);
-      }
-    } catch (error) {
-      console.error("Error:", error);
+  const refreshProfile = async () => {
+    const updatedProfile = await fetchProfileData();
+    if (updatedProfile) {
+      setProfileData(updatedProfile);
     }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const joinDate = new Date(currentUser.created_at).toLocaleDateString(
+  const joinDate = new Date(profileData.user.created_at).toLocaleDateString(
     "en-US",
     {
       year: "numeric",
@@ -75,10 +41,10 @@ export function UserProfile({ user }: UserProfileProps) {
   );
 
   // Get display name and avatar from user metadata
-  const displayName = currentUser.user_metadata?.display_name || "";
+  const displayName = profileData.user.user_metadata?.display_name || "";
   const avatarUrl =
-    currentUser.user_metadata?.profile_img ||
-    currentUser.user_metadata?.avatar_url;
+    profileData.user.user_metadata?.profile_img ||
+    profileData.user.user_metadata?.avatar_url;
 
   const container = {
     hidden: { opacity: 0 },
@@ -104,30 +70,6 @@ export function UserProfile({ user }: UserProfileProps) {
     },
   };
 
-  const mockStories = [
-    {
-      id: 1,
-      title: "The Adventure Begins",
-      description: "A journey through magical realms and ancient mysteries...",
-      emoji: "🌟",
-      imageUrl: "/assets/img/placeholders/book_placeholder.png",
-    },
-    {
-      id: 2,
-      title: "Lost in Time",
-      description: "Exploring the depths of time and space...",
-      emoji: "⏳",
-      imageUrl: "/assets/img/placeholders/book_placeholder.png",
-    },
-    {
-      id: 3,
-      title: "The Last Guardian",
-      description: "A tale of loyalty, courage, and destiny...",
-      emoji: "🛡️",
-      imageUrl: "/assets/img/placeholders/book_placeholder.png",
-    },
-  ];
-
   return (
     <motion.section
       variants={container}
@@ -148,7 +90,7 @@ export function UserProfile({ user }: UserProfileProps) {
               className="object-cover object-center"
             />
             <AvatarFallback>
-              {displayName?.charAt(0) || currentUser.email?.charAt(0)}
+              {displayName?.charAt(0) || profileData.user.email?.charAt(0)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -157,32 +99,34 @@ export function UserProfile({ user }: UserProfileProps) {
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between w-full">
             <motion.div variants={item} className="flex items-center gap-2">
               <h1 className="text-2xl font-medium tracking-tighter">
-                {displayName || currentUser.email?.split("@")[0] || "User"}
+                {displayName || profileData.user.email?.split("@")[0] || "User"}
               </h1>
-              <ProfileEditor
-                user={currentUser}
-                displayName={displayName}
-                avatarUrl={avatarUrl}
-                onProfileUpdate={fetchProfile}
-              />
+              {isPersonalProfile && (
+                <ProfileEditor
+                  profileData={profileData}
+                  onProfileUpdate={refreshProfile}
+                />
+              )}
             </motion.div>
-            <motion.div variants={item}>
-              <form action={signOutAction}>
-                <Button type="submit" variant="outline" size="sm">
-                  Sign out
-                </Button>
-              </form>
-            </motion.div>
+            {isPersonalProfile && (
+              <motion.div variants={item}>
+                <form action={signOutAction}>
+                  <Button type="submit" variant="outline" size="sm">
+                    Sign out
+                  </Button>
+                </form>
+              </motion.div>
+            )}
           </div>
 
           <motion.div
             variants={item}
             className="flex items-center flex-col md:flex-row gap-2 md:gap-6 text-sm text-muted-foreground"
           >
-            {currentUser.email && (
+            {isPersonalProfile && profileData.user.email && (
               <div className="flex items-center gap-1">
                 <Mail className="w-4 h-4" />
-                {currentUser.email}
+                {profileData.user.email}
               </div>
             )}
 
@@ -193,41 +137,47 @@ export function UserProfile({ user }: UserProfileProps) {
               </div>
             )}
 
-            {currentUser.user_metadata?.location && (
+            {profileData.user.user_metadata?.location && (
               <div className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                {currentUser.user_metadata.location}
+                {profileData.user.user_metadata.location}
               </div>
             )}
           </motion.div>
 
-          {currentUser.user_metadata?.bio && (
+          {profileData.user.user_metadata?.bio && (
             <motion.p variants={item} className="text-sm max-w-md">
-              {currentUser.user_metadata.bio}
+              {profileData.user.user_metadata.bio}
             </motion.p>
           )}
         </div>
       </motion.div>
 
-      <motion.div variants={item}>
-        <SubscriptionTier subscription={mockSubscription} usage={mockUsage} />
-      </motion.div>
+      {isPersonalProfile && (
+        <motion.div variants={item}>
+          <SubscriptionTier
+            subscription={profileData.subscription}
+            usage={profileData.usage}
+          />
+        </motion.div>
+      )}
 
       <Separator />
 
-      {/* TODO: Switch out mockstories for the stories from the DB */}
       <motion.div variants={item} className="flex flex-col gap-6 pt-8">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium tracking-tight">
-            Your stories {"(" + mockStories?.length + ")"}
+            Stories {"(" + profileData.stories?.length + ")"}
           </h3>
-          <Link href="/create">
-            <Button size="sm" variant="outline">
-              Add new
-            </Button>
-          </Link>
+          {isPersonalProfile && (
+            <Link href="/create">
+              <Button size="sm" variant="outline">
+                Add new
+              </Button>
+            </Link>
+          )}
         </div>
-        <StoryList stories={mockStories} />
+        <StoryList stories={profileData.stories} />
       </motion.div>
     </motion.section>
   );
