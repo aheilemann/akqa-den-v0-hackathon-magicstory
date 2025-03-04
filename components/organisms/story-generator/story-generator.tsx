@@ -9,7 +9,7 @@ import { createStoryPrompt } from "@/lib/prompt/story";
 import { type Story, type StoryConfig } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { saveStory } from "@/app/actions/save-story";
+import { saveStory } from "@/app/actions";
 import { toast } from "sonner";
 
 interface StoryGeneratorProps {
