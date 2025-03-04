@@ -2,7 +2,28 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["replicate.com", "replicate.delivery"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "eujhdaaodhbravffsyrx.supabase.co",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "replicate.com",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "replicate.delivery",
+        pathname: "**",
+      },
+    ],
   },
 };
 

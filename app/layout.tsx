@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navigation } from "@/components/organisms/navigation";
 import { Footer } from "@/components/organisms/footer";
+import { Toaster } from "sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -41,6 +42,7 @@ export default function RootLayout({
             </div>
           </main>
         </ThemeProvider>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );
