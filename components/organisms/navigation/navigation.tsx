@@ -17,7 +17,7 @@ export async function Navigation() {
   return (
     <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 z-50">
       <div className="container px-4 md:px-6 flex justify-between items-center p-3 text-sm">
-        <Link href="/" className="font-semibold text-lg tracking-tighter hover:opacity-60 transition-opacity duration-300 ease-out">
+        <Link href="/" className="font-serif text-lg tracking-tighter hover:opacity-60 transition-opacity duration-300 ease-out">
           ✨StoryMagic
         </Link>
 
