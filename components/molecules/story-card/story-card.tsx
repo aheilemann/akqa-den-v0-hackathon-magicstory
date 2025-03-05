@@ -50,7 +50,12 @@ export function StoryCard({ story }: StoryCardProps) {
 
   return (
     <Link href={`/story/${story.story_id}`}>
-      <motion.div ref={cardRef} variants={storyItem} onMouseMove={handleMouseMove} className="relative aspect-[9/16] rounded-md overflow-hidden group">
+      <motion.div
+        ref={cardRef}
+        variants={storyItem}
+        onMouseMove={handleMouseMove}
+        className="relative aspect-[1/1.5] rounded-md overflow-hidden group"
+      >
         {/* Gradient Border - Updated opacity and colors */}
         <div className="absolute inset-0 rounded-md p-[2px] bg-gradient-to-b from-white/30 to-white/10 dark:from-white/20 dark:to-white/[0.05]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40 dark:from-black/20 dark:to-black/80 rounded-md" />
@@ -84,13 +89,17 @@ export function StoryCard({ story }: StoryCardProps) {
           {/* Emoji Badge - Updated background color for light mode */}
           <div className="absolute top-4 left-4">
             <div className="bg-black/80 dark:bg-background/80 backdrop-blur-sm p-2.5 rounded-full border border-white/20 transition-all duration-300 group-hover:scale-110">
-              <span className="text-base text-white inline-block animate-none group-hover:animate-[wiggle_0.3s_ease-in-out]">{story.emoji || "✨"}</span>
+              <span className="text-base text-white inline-block animate-none group-hover:animate-[wiggle_0.3s_ease-in-out]">
+                {story.emoji || "✨"}
+              </span>
             </div>
           </div>
 
           {/* Content */}
           <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-300 group-hover:translate-y-[-4px]">
-            <h4 className="font-medium text-2xl tracking-tight text-white">{title}</h4>
+            <h4 className="font-medium text-2xl tracking-tight text-white">
+              {title}
+            </h4>
           </div>
         </div>
       </motion.div>
