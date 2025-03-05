@@ -3,8 +3,13 @@ import { StoryViewer } from "@/components/organisms/story-viewer/story-viewer";
 
 import { getStoryById } from "@/app/actions";
 
-export default async function StoryPage({ params }: { params: { id: string } }) {
-  const story = await getStoryById(params.id);
+export default async function StoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const story = await getStoryById(id);
 
   if (!story) {
     notFound();
