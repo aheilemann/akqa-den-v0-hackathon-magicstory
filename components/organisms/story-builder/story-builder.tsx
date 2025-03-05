@@ -74,22 +74,6 @@ export function StoryBuilder() {
     setIsLimitReachedOpen(true);
   };
 
-  if (settings.setting && settings.character && settings.theme) {
-    return (
-      <>
-        <StoryGenerator
-          settings={settings as StoryConfig}
-          onLimitReached={handleLimitReached}
-        />
-        <LimitReachedDialog
-          isOpen={isLimitReachedOpen}
-          onClose={() => setIsLimitReachedOpen(false)}
-          limit={limitValue}
-        />
-      </>
-    );
-  }
-
   useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
