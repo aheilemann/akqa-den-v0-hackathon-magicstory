@@ -15,9 +15,10 @@ import { IMAGE_PROMPT } from "@/lib/prompt";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
+  onLimitReached?: (limit: number) => void;
 }
 
-const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
+const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
 
   const [error, setError] = useState<string | null>(null);
@@ -35,19 +36,16 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
     try {
       let results;
       if (!USE_STATIC_STORY) {
-        const imagePromises = story.pages.map(
-          async (page: { imagePrompt: string }, index: number) => {
-            const response = await fetch("/api/generate-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
-            });
-            if (!response.ok)
-              throw new Error(`Failed to generate image ${index + 1}`);
-            const data = await response.json();
-            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-          }
-        );
+        const imagePromises = story.pages.map(async (page: { imagePrompt: string }, index: number) => {
+          const response = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+          });
+          if (!response.ok) throw new Error(`Failed to generate image ${index + 1}`);
+          const data = await response.json();
+          return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+        });
 
         results = await Promise.all(imagePromises);
       } else {
@@ -119,6 +117,10 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
       if (result.success) {
         toast.success("Story saved successfully!");
       } else {
+        if (result.error === "LIMIT_REACHED" && onLimitReached) {
+          onLimitReached(result.limit);
+          return;
+        }
         throw result.error;
       }
     } catch (error) {
