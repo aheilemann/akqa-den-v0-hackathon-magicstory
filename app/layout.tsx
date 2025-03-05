@@ -4,6 +4,8 @@ import "./globals.css";
 import { Navigation } from "@/components/organisms/navigation";
 import { Footer } from "@/components/organisms/footer";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -11,7 +13,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "🪄 StoryMagic.AI",
+  title: "🪄 MagicStory.AI",
   description: "Create immersive stories with AI",
 };
 
@@ -43,6 +45,8 @@ export default function RootLayout({
           </main>
         </ThemeProvider>
         <Toaster position="bottom-right" />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

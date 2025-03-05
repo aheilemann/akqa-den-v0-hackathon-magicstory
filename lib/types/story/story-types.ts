@@ -12,6 +12,11 @@ export interface Story {
 }
 
 export interface StoryConfig {
+  target_age: {
+    name: string;
+    description: string;
+    emoji: string;
+  };
   setting: {
     name: string;
     description: string;

@@ -1,3 +1,11 @@
+export const TARGET_AGE_PROMPT = `Generate 3 unique and imaginative settings for a children's story.
+For each setting include:
+- name: The target age. 
+- emoji: A single appropriate emoji
+- value: The range value of the target age. 
+
+Format as JSON array. Make them whimsical and appealing to children aged 5-12.`;
+
 export const SETTING_PROMPT = `Generate 3 unique and imaginative settings for a children's story.
 For each setting include:
 - name: A short, catchy name
@@ -26,14 +34,13 @@ For each theme include:
 Format as JSON array. Keep themes age-appropriate and positive.`;
 
 export const IMAGE_PROMPT = (setting: string) => `
-Create a whimsical children's book illustration for:
+Create a whimsical children's illustration for:
 ${setting}
 
 Style guide:
 - Soft, warm colors with dreamy lighting
 - Simple shapes with charming hidden details
 - Friendly characters with expressive features
-- Classic storybook style (like Beatrix Potter)
 - Safe and inviting atmosphere
 - Clear focal point with magical touches
 `;
