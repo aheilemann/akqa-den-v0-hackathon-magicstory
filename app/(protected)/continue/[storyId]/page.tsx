@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { OptionCard } from "@/components/molecules/option-card";
 import { type Option } from "@/lib/types";
+import { fetchProfileData } from "@/app/actions";
+import { toast } from "sonner";
 
 const continuationOptions = [
   {
@@ -40,6 +42,41 @@ export default function StoryContinuationPage({ params }: { params: Promise<{ st
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkContinuationLimit = async () => {
+      try {
+        const profileData = await fetchProfileData();
+        if (!profileData) {
+          toast.error("Unable to verify continuation limit");
+          router.push("/");
+          return;
+        }
+
+        const { usage } = profileData;
+        if (usage.continuations.total !== null && usage.continuations.used >= usage.continuations.total) {
+          toast.error(
+            <div className="flex flex-col gap-2">
+              <span>You've reached your daily continuation limit!</span>
+              <Button variant="outline" size="sm" onClick={() => router.push("/pricing")} className="w-full">
+                Upgrade to continue more stories
+              </Button>
+            </div>
+          );
+          router.push("/");
+          return;
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error checking continuation limit:", error);
+        toast.error("Unable to verify continuation limit");
+        router.push("/");
+      }
+    };
+
+    checkContinuationLimit();
+  }, [router]);
 
   const handleSelect = (option: Option) => {
     setSelectedOption(option);
@@ -80,6 +117,16 @@ export default function StoryContinuationPage({ params }: { params: Promise<{ st
       setIsGenerating(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Sparkles className="h-8 w-8 animate-spin" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-4xl mx-auto p-6">

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useRef, MouseEvent } from "react";
 import { Story } from "@/components/organisms/story-list/story-list";
-import { deleteStory } from "@/app/actions";
+import { deleteStory, fetchProfileData } from "@/app/actions";
 import { Trash2Icon, BookOpenIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -72,6 +72,33 @@ export function StoryCard({ story }: StoryCardProps) {
     }
   };
 
+  const handleContinue = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Check user's continuation limit
+    const profileData = await fetchProfileData();
+    if (!profileData) {
+      toast.error("Unable to verify continuation limit. Please try again.");
+      return;
+    }
+
+    const { usage } = profileData;
+    if (usage.continuations.total !== null && usage.continuations.used >= usage.continuations.total) {
+      toast.error(
+        <div className="flex flex-col gap-2">
+          <span>You've reached your daily continuation limit!</span>
+          <Button variant="outline" size="sm" onClick={() => router.push("/pricing")} className="w-full">
+            Upgrade to continue more stories
+          </Button>
+        </div>
+      );
+      return;
+    }
+
+    router.push(`/continue/${story.story_id}`);
+  };
+
   // Extract data from story content
   const content = story.story_content || {};
   const coverImage = content.pages?.[0]?.imageUrl;
@@ -133,16 +160,7 @@ export function StoryCard({ story }: StoryCardProps) {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        router.push(`/continue/${story.story_id}`);
-                      }}
-                      size="icon"
-                      variant={"outline"}
-                      className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
-                    >
+                    <Button onClick={handleContinue} size="icon" variant={"outline"} className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm">
                       <BookOpenIcon className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>

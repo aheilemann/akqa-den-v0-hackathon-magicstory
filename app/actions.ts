@@ -156,6 +156,10 @@ export type ProfileData = {
   usage: {
     used: number;
     total: number;
+    continuations: {
+      used: number;
+      total: number | null;
+    };
   };
 };
 
@@ -201,14 +205,19 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
       console.error("Error fetching usage data:", usageError);
     }
 
+    // Get continuation count
+    const { count: continuationCount } = await supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today);
+
     console.log("Usage data fetched:", {
       userId: user.id,
       date: today,
       stories_generated: usageData?.stories_generated,
+      continuations: continuationCount,
     });
 
     const storiesGenerated = usageData?.stories_generated || 0;
     const storyLimit = subscriptionData?.subscription_tier_story_limit;
+    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
 
     const profileData = {
       user,
@@ -226,6 +235,10 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
       usage: {
         used: storiesGenerated,
         total: storyLimit,
+        continuations: {
+          used: continuationCount || 0,
+          total: continuationLimit,
+        },
       },
     };
 
@@ -574,5 +587,58 @@ export async function updateUserSubscription(tierId: string) {
   } catch (error) {
     console.error("Error updating subscription:", error);
     return { success: false, error };
+  }
+}
+
+export async function incrementStoryContinuation(storyId: string, continuationType: string, customPrompt?: string): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Get the story to verify ownership
+    const { data: storyData } = await supabase.from("stories").select("story_user_id").eq("story_id", storyId).single();
+
+    if (!storyData) throw new Error("Story not found");
+    if (storyData.story_user_id !== user.id) throw new Error("Unauthorized");
+
+    // Check if user has reached their daily continuation limit
+    const today = new Date().toISOString().split("T")[0];
+    const { count: continuationCount } = await supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today);
+
+    // Get user's subscription tier
+    const { data: subscriptionData } = await supabase
+      .from("subscription_tiers")
+      .select("subscription_tier_continuation_limit")
+      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+      .single();
+
+    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
+    const currentContinuations = continuationCount || 0;
+
+    // If continuationLimit is null, it means unlimited
+    // If continuationLimit is a number, check if we've reached it
+    if (continuationLimit !== null && currentContinuations >= continuationLimit) {
+      return false;
+    }
+
+    // Record the continuation
+    const { error: continuationError } = await supabase.from("story_continuations").insert({
+      story_continuation_story_id: storyId,
+      story_continuation_type: continuationType,
+      story_continuation_custom_prompt: customPrompt,
+      story_continuation_content: {}, // This will be updated later with the actual continuation content
+    });
+
+    if (continuationError) throw continuationError;
+
+    return true;
+  } catch (error) {
+    console.error("Error recording story continuation:", error);
+    return false;
   }
 }

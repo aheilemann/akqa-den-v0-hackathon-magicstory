@@ -72,6 +72,38 @@ export async function POST(req: Request, context: { params: Promise<{ storyId: s
   try {
     const [{ type, customPrompt }, supabase, { storyId }] = await Promise.all([req.json(), createClient(), context.params]);
 
+    // Get current user and verify their continuation limit
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Get user's subscription tier and current usage
+    const today = new Date().toISOString().split("T")[0];
+    const [{ count: continuationCount }, { data: subscriptionData }] = await Promise.all([
+      supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today),
+      supabase
+        .from("subscription_tiers")
+        .select("subscription_tier_continuation_limit")
+        .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+        .single(),
+    ]);
+
+    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
+    if (continuationLimit !== null && (continuationCount || 0) >= continuationLimit) {
+      return new Response(
+        JSON.stringify({
+          error: "Daily continuation limit reached",
+          limit: continuationLimit,
+          used: continuationCount,
+        }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Get the original story
     const { data: story, error: storyError } = await supabase.from("stories").select("*, story_content").eq("story_id", storyId).single();
 
