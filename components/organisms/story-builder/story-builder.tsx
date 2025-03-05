@@ -11,6 +11,7 @@ import { steps } from "./story-builder.mocks";
 import { OptionsStatic } from "@/components/molecules/options-static";
 import clsx from "clsx";
 import { LimitReachedDialog } from "@/components/molecules/limit-reached-dialog";
+import { useCreateContext } from "@/context/CreateStoryContext";
 
 type PartialStoryConfig = {
   targetAge?: Option;
@@ -23,6 +24,8 @@ export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
   const USE_STATIC_OPTIONS =
     process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
+
+  const { imageData } = useCreateContext();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
@@ -75,6 +78,16 @@ export function StoryBuilder() {
   };
 
   useEffect(() => {
+    // TODO:
+    // - Get captions
+    // - Check if captions is falsy
+    // - If not, use the captions to auto. gen
+    // target age, setting, theme and story type.
+    if (!imageData) return;
+    console.log("IMAGE DATA: ", imageData);
+  }, [imageData]);
+
+  useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
     }
@@ -92,7 +105,16 @@ export function StoryBuilder() {
 
   return (
     <div>
-      {settings && showStoryGenerator ? (
+      {imageData && imageData.data && (
+        <div>
+          You image data:{" "}
+          {imageData.data[0]
+            ? imageData.data[0].caption
+            : "No image data was found."}
+        </div>
+      )}
+
+      {(!imageData || !imageData.data) && settings && showStoryGenerator && (
         <div>
           <StoryGenerator
             settings={settings as StoryConfig}
@@ -104,7 +126,9 @@ export function StoryBuilder() {
             limit={limitValue}
           />
         </div>
-      ) : (
+      )}
+
+      {(!imageData || !imageData.data) && !settings && !showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
