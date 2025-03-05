@@ -13,7 +13,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "🪄 StoryMagic.AI",
+  title: "🪄 MagicStory.AI",
   description: "Create immersive stories with AI",
 };
 
