@@ -1,6 +1,7 @@
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { getUser } from "@/app/actions";
 
 type FooterLink = {
   href: string;
@@ -25,17 +26,24 @@ const accountLinks: FooterLink[] = [
   { href: "/forgot-password", label: "Forgot Password" },
 ];
 
+const accountLinksAuth: FooterLink[] = [
+  { href: "/profile", label: "Profile" },
+  { href: "/reset-password", label: "Reset Password" },
+];
+
 const legalLinks: FooterLink[] = [
   { href: "/privacy-policy", label: "Privacy Policy" },
   { href: "/terms-of-service", label: "Terms of Service" },
 ];
 
-const linkGroups: FooterLinkGroup[] = [
-  { title: "Product", links: productLinks },
-  { title: "Account", links: accountLinks },
-];
+export async function Footer() {
+  const user = await getUser();
 
-const Footer = () => {
+  const linkGroups: FooterLinkGroup[] = [
+    { title: "Product", links: productLinks },
+    { title: "Account", links: user ? accountLinksAuth : accountLinks },
+  ];
+
   return (
     <footer className="w-full border-t bg-background">
       <div className="container px-4 md:px-6 py-16">
@@ -77,7 +85,7 @@ const Footer = () => {
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
             <span className="text-muted-foreground">
-              © 2024 StoryMagic. All rights reserved.
+              © 2025 StoryMagic. All rights reserved.
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -95,6 +103,4 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
-
-export { Footer };
+}
