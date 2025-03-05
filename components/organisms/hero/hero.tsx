@@ -31,7 +31,7 @@ const Hero = () => {
     const updateViewport = () => {
       setViewport({
         width: window.innerWidth,
-        height: window.innerHeight,
+        height: window.innerHeight
       });
     };
 
@@ -65,24 +65,24 @@ const Hero = () => {
           { pos: [1.1, 1.1, -2], scale: baseScale },
           { pos: [-1.4, 0.3, -1.2], scale: baseScale * 0.9 },
           { pos: [0.7, -0.4, -1.8], scale: baseScale * 1.1 },
-          { pos: [-0.5, 0.6, -1.3], scale: baseScale * 0.6 },
+          { pos: [-0.5, 0.6, -1.3], scale: baseScale * 0.6 }
         ]
       : [
-          { pos: [-2.5, 1.5, -2], scale: baseScale * 1.2 },
+          { pos: [-2.5, 1.8, -2], scale: baseScale * 1.2 },
           { pos: [2.8, -1.3, -1], scale: baseScale * 0.7 },
           { pos: [0, 2.5, -3], scale: baseScale * 1.4 },
           { pos: [-2, -1.8, -2], scale: baseScale * 0.8 },
           { pos: [2.2, 1.8, -2.5], scale: baseScale },
-          { pos: [-3, 0.7, -1.5], scale: baseScale * 0.9 },
+          { pos: [-4.1, 0.7, -1.5], scale: baseScale * 0.9 },
           { pos: [1.5, -0.8, -2.2], scale: baseScale * 1.1 },
-          { pos: [-1.2, 1.2, -1.8], scale: baseScale * 0.6 },
+          { pos: [-1.2, 1.4, -1.8], scale: baseScale * 0.6 }
         ];
 
     return {
       starsConfig: starsConfig as {
         pos: [number, number, number];
         scale: number;
-      }[],
+      }[]
     };
   };
 
@@ -99,7 +99,7 @@ const Hero = () => {
         <Canvas
           camera={{ position: [0, 0, viewport.width < 768 ? 3 : 5], fov: 50 }}
         >
-          <Environment preset="studio" blur={0.8} />
+          <Environment preset="forest" blur={0.6} background={true} />
 
           {/* Subtle front ambient light */}
           <ambientLight intensity={0.5} />
