@@ -19,13 +19,15 @@ interface StoryGeneratorProps {
 }
 
 const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
-  const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
+  const DISABLE_IMAGE_GENERATION =
+    process.env.DISABLE_IMAGE_GENERATION === "true";
 
   const [error, setError] = useState<string | null>(null);
   const [story, setStory] = useState<Story | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [generatingStory, setGeneratingStory] = useState(false);
+  const [hasGeneratedStory, setHasGeneratedStory] = useState(false);
   const [imagesFetched, setImagesFetched] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -35,17 +37,20 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
 
     try {
       let results;
-      if (!USE_STATIC_STORY) {
-        const imagePromises = story.pages.map(async (page: { imagePrompt: string }, index: number) => {
-          const response = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
-          });
-          if (!response.ok) throw new Error(`Failed to generate image ${index + 1}`);
-          const data = await response.json();
-          return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-        });
+      if (!DISABLE_IMAGE_GENERATION) {
+        const imagePromises = story.pages.map(
+          async (page: { imagePrompt: string }, index: number) => {
+            const response = await fetch("/api/generate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+            });
+            if (!response.ok)
+              throw new Error(`Failed to generate image ${index + 1}`);
+            const data = await response.json();
+            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+          },
+        );
 
         results = await Promise.all(imagePromises);
       } else {
@@ -59,9 +64,11 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
         if (!prev) return prev;
         const newPages = [...prev.pages];
 
-        results.forEach(({ index, imageUrl }: { index: number; imageUrl: string }): void => {
-          newPages[index] = { ...newPages[index], imageUrl };
-        });
+        results.forEach(
+          ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
+            newPages[index] = { ...newPages[index], imageUrl };
+          },
+        );
         return { ...prev, pages: newPages };
       });
     } catch (error) {
@@ -72,15 +79,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
     }
   }, [story]);
 
-  useEffect(() => {
-    if (story && !generatingImages && !imagesFetched) {
-      generateAllImages();
-    }
-  }, [imagesFetched, generateAllImages]);
-
-  const generateStory = async () => {
+  const generateStory = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setGeneratingStory(true);
       setError(null);
 
       const prompt = createStoryPrompt(settings);
@@ -104,9 +105,10 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       setError("Failed to generate story. Please try again.");
       console.error("Error generating story:", err);
     } finally {
-      setIsLoading(false);
+      setGeneratingStory(false);
+      setHasGeneratedStory(true);
     }
-  };
+  }, []);
 
   const handleSaveStory = async () => {
     if (!story) return;
@@ -131,12 +133,31 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
     }
   };
 
-  if (isLoading) {
+  useEffect(() => {
+    if (story && !generatingImages && !imagesFetched) {
+      generateAllImages();
+    }
+  }, [imagesFetched, generateAllImages]);
+
+  useEffect(() => {
+    if (!generatingStory && !hasGeneratedStory) {
+      generateStory();
+    }
+  }, [generateStory]);
+
+  if (generatingStory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center gap-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center gap-4"
+        >
           <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground">Creating your magical story...</p>
+          <p className="text-muted-foreground">
+            Creating your magical story...
+          </p>
         </motion.div>
       </div>
     );
@@ -157,7 +178,11 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">{story.title}</h1>
-          <Button onClick={handleSaveStory} disabled={isSaving} className="mt-4">
+          <Button
+            onClick={handleSaveStory}
+            disabled={isSaving}
+            className="mt-4"
+          >
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -176,7 +201,19 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
           {/* Image side */}
           <div className="relative aspect-square w-full">
             {story.pages[currentPage].imageUrl ? (
-              <div>{USE_STATIC_STORY ? <p>{story.pages[currentPage].imageUrl}</p> : <Image src={story.pages[currentPage].imageUrl} alt={`Story illustration ${currentPage + 1}`} fill className="object-cover rounded-lg" priority />}</div>
+              <div>
+                {DISABLE_IMAGE_GENERATION ? (
+                  <p>{story.pages[currentPage].imageUrl}</p>
+                ) : (
+                  <Image
+                    src={story.pages[currentPage].imageUrl}
+                    alt={`Story illustration ${currentPage + 1}`}
+                    fill
+                    className="object-cover rounded-lg"
+                    priority
+                  />
+                )}
+              </div>
             ) : (
               <div className="w-full h-full relative">
                 <Skeleton className="absolute inset-0 rounded-lg" />
@@ -189,19 +226,28 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
 
           {/* Text side */}
           <div className="flex flex-col justify-center">
-            <p className="text-lg leading-relaxed">{story.pages[currentPage].text}</p>
+            <p className="text-lg leading-relaxed">
+              {story.pages[currentPage].text}
+            </p>
           </div>
         </div>
 
         <div className="flex justify-between items-center mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage((p) => p - 1)} disabled={currentPage === 0}>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={currentPage === 0}
+          >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Previous Page
           </Button>
           <p className="text-muted-foreground">
             Page {currentPage + 1} of {story.pages.length}
           </p>
-          <Button onClick={() => setCurrentPage((p) => p + 1)} disabled={currentPage === story.pages.length - 1}>
+          <Button
+            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={currentPage === story.pages.length - 1}
+          >
             Next Page
             <ChevronRight className="h-4 w-4 ml-2" />
           </Button>

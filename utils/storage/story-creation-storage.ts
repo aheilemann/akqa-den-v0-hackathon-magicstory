@@ -56,6 +56,11 @@ export const getAllStoryDataAsStoryConfig = (): StoryConfig | null => {
   }
 
   const storyConfig: StoryConfig = {
+    target_age: {
+      name: "TODO",
+      description: "TODO",
+      emoji: "",
+    },
     theme: {
       name: theme,
       description: `"${subThemes.join(",")}"`,
