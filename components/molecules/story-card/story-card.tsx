@@ -15,14 +15,6 @@ export type StoryCardProps = {
   story: Story;
 };
 
-const wiggleKeyframes = `
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-7deg); }
-  75% { transform: rotate(7deg); }
-}
-`;
-
 const storyItem = {
   hidden: { opacity: 0, y: 20 },
   show: {
@@ -139,13 +131,6 @@ export function StoryCard({ story }: StoryCardProps) {
             <Button onClick={handleDelete} disabled={isDeleting} size="icon" variant={"outline"} className="absolute rounded-full bg-white/70 top-4 right-4 z-10 h-9 w-9 backdrop-blur-sm">
               <Trash2Icon className="h-4 w-4" />
             </Button>
-
-            {/* Emoji Badge */}
-            <div className="absolute top-4 left-4">
-              <div className="bg-black/80 dark:bg-background/80 backdrop-blur-sm p-2.5 rounded-full border border-white/20 transition-all duration-300 group-hover:scale-110">
-                <span className="text-base text-white inline-block animate-none group-hover:animate-[wiggle_0.3s_ease-in-out]">{story.emoji || "✨"}</span>
-              </div>
-            </div>
 
             {/* Content */}
             <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-300 group-hover:translate-y-[-4px]">
