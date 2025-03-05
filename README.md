@@ -1,104 +1,137 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# MagicStory - AI-Powered Children's Story Creator
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+MagicStory is an interactive platform that allows users to create and experience personalized children's stories using artificial intelligence. The application enables parents, teachers, and storytellers to quickly generate immersive stories with custom characters, professional narration, and beautiful illustrations.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+![MagicStory](public/assets/img/placeholders/book_placeholder.png)
 
-## Features
+## 🌟 Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+- **AI-Powered Story Generation**: Create complete children's stories with just a few clicks
+- **Customizable Characters**: Design unique characters with distinct traits and personalities
+- **Theme Selection**: Choose from various themes to set the tone of your story
+- **Age-Appropriate Content**: Target specific age groups with appropriate language and themes
+- **Interactive Story Viewer**: Read and experience stories with beautiful illustrations
+- **User Authentication**: Secure account management with email and Google sign-in options
+- **Subscription Tiers**: Access different features based on subscription levels
 
-## Demo
+## 🚀 Getting Started
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### Prerequisites
 
-## Deploy to Vercel
+- Node.js (v16 or later)
+- npm or yarn
+- Supabase account for backend services
 
-Vercel deployment will guide you through creating a Supabase account and project.
+### Installation
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
-
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
-
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
-
-## Clone and run locally
-
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
+1. Clone the repository:
 
    ```bash
-   npx create-next-app --example with-supabase with-supabase-app
+   git clone https://github.com/yourusername/magic-story.git
+   cd magic-story
    ```
+
+2. Install dependencies:
 
    ```bash
-   yarn create next-app --example with-supabase with-supabase-app
+   npm install
    ```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+3. Configure environment variables:
 
-3. Use `cd` to change into the app's directory
+   - Rename `.env.example` to `.env.local`
+   - Update the Supabase URL and anon key
+   - Add any other required API keys
 
-   ```bash
-   cd with-supabase-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-   ```
-   SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `SUPABASE_URL` and `SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
+4. Run the development server:
 
    ```bash
    npm run dev
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## 📂 Project Structure
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+- **`/app`**: Next.js App Router pages and API routes
 
-## Feedback and issues
+  - **`/story`**: Story viewing and creation routes
+  - **`/profile`**: User profile management
+  - **`/checkout`**: Subscription management
+  - **`/api`**: Backend API endpoints
+  - **`actions.ts`**: Server actions for data operations
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+- **`/components`**: Reusable UI components
 
-## More Supabase examples
+  - **`/ui`**: Basic UI components from shadcn/ui
+  - **`/organisms`**: Complex component compositions
+    - **`/hero`**: Landing page hero section
+    - **`/story-viewer`**: Components for viewing stories
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+- **`/lib`**: Core libraries and type definitions
+
+  - **`/types`**: TypeScript interfaces and types
+    - **`/story`**: Story-related type definitions
+
+- **`/utils`**: Utility functions and helpers
+  - **`/supabase`**: Supabase client configuration
+  - **`/story-options`**: Story generation options
+
+## 🧠 Key Concepts
+
+### Story Creation Flow
+
+1. **Character Selection**: Choose or create a character for your story
+2. **Theme Selection**: Pick a theme that sets the emotional tone
+3. **Setting Selection**: Choose where your story takes place
+4. **Age Target**: Select the appropriate age group
+5. **Story Generation**: AI creates a complete story with text and image prompts
+6. **Story Viewer**: Read and interact with the generated story
+
+### Authentication
+
+The application uses Supabase for authentication, supporting:
+
+- Email/password registration and login
+- Google OAuth integration
+- Password reset functionality
+
+### Subscription Tiers
+
+Users can access different features based on their subscription level:
+
+- Free tier with limited story generation
+- Premium tiers with additional features and higher usage limits
+
+## 🛠️ Technologies
+
+- **Frontend**: Next.js, React, TailwindCSS, shadcn/ui
+- **3D Visualization**: Three.js, React Three Fiber
+- **Authentication**: Supabase Auth
+- **Database**: Supabase PostgreSQL
+- **AI Integration**: OpenAI, Replicate
+- **Styling**: TailwindCSS, Framer Motion
+
+## 📱 Usage
+
+1. Create an account or log in
+2. Navigate to the "Create" page
+3. Follow the guided process to select character, theme, setting and age group
+4. Wait for AI to generate your story
+5. View, share or save your story
+6. Access your stories anytime from your profile
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## ✨ Acknowledgements
+
+- Built with [Next.js](https://nextjs.org/)
+- Authentication and database by [Supabase](https://supabase.com/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- 3D effects with [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
