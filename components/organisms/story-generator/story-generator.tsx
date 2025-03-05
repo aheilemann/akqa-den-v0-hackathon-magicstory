@@ -49,7 +49,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
               throw new Error(`Failed to generate image ${index + 1}`);
             const data = await response.json();
             return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-          }
+          },
         );
 
         results = await Promise.all(imagePromises);
@@ -67,7 +67,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
         results.forEach(
           ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
             newPages[index] = { ...newPages[index], imageUrl };
-          }
+          },
         );
         return { ...prev, pages: newPages };
       });
@@ -258,9 +258,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
 
   return (
     <Card className="max-w-4xl mx-auto p-6">
-      {/* <Button onClick={generateStory} className="w-full"> */}
-      {/*   Generate Story */}
-      {/* </Button> */}
+      <Button onClick={generateStory} className="w-full">
+        Generate Story
+      </Button>
     </Card>
   );
 };
