@@ -15,11 +15,7 @@ export const signUpAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required"
-    );
+    return encodedRedirect("error", "/sign-up", "Email and password are required");
   }
 
   const { error } = await supabase.auth.signUp({
@@ -37,11 +33,7 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
+    return encodedRedirect("success", "/sign-up", "Thanks for signing up! Please check your email for a verification link.");
   }
 };
 
@@ -78,22 +70,14 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.message);
-    return encodedRedirect(
-      "error",
-      "/forgot-password",
-      "Could not reset password"
-    );
+    return encodedRedirect("error", "/forgot-password", "Could not reset password");
   }
 
   if (callbackUrl) {
     return redirect(callbackUrl);
   }
 
-  return encodedRedirect(
-    "success",
-    "/forgot-password",
-    "Check your email for a link to reset your password."
-  );
+  return encodedRedirect("success", "/forgot-password", "Check your email for a link to reset your password.");
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
@@ -103,11 +87,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!password || !confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/reset-password",
-      "Password and confirm password are required"
-    );
+    encodedRedirect("error", "/reset-password", "Password and confirm password are required");
   }
 
   if (password !== confirmPassword) {
@@ -131,17 +111,13 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
-export type SubscriptionTier =
-  Database["public"]["Tables"]["subscription_tiers"]["Row"];
+export type SubscriptionTier = Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
 export async function fetchTiers() {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("subscription_tiers")
-      .select("*")
-      .order("subscription_tier_price");
+    const { data, error } = await supabase.from("subscription_tiers").select("*").order("subscription_tier_price");
 
     if (error) throw error;
     return data as SubscriptionTier[];
@@ -183,20 +159,14 @@ export type ProfileData = {
   };
 };
 
-export async function fetchProfileData(
-  id?: string
-): Promise<ProfileData | null> {
+export async function fetchProfileData(id?: string): Promise<ProfileData | null> {
   try {
     const supabase = await createClient();
 
     // Get user data - either by ID or current user
     let user;
     if (id) {
-      const { data: userData } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data: userData } = await supabase.from("users").select("*").eq("id", id).single();
       user = userData;
     } else {
       const {
@@ -214,10 +184,7 @@ export async function fetchProfileData(
     const { data: subscriptionData, error: subscriptionError } = await supabase
       .from("subscription_tiers")
       .select("*")
-      .eq(
-        "subscription_tier_id",
-        user.user_metadata?.subscription_tier_id || "free"
-      )
+      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
       .single();
 
     if (subscriptionError) {
@@ -303,11 +270,9 @@ export async function uploadProfileAvatar(file: File) {
     const filePath = `${user.id}.${fileExt}`;
 
     // Upload the file
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, {
-        upsert: true,
-      });
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, {
+      upsert: true,
+    });
 
     if (uploadError) throw uploadError;
 
@@ -332,24 +297,17 @@ export async function uploadProfileAvatar(file: File) {
   }
 }
 
-async function uploadStoryImage(
-  supabase: any,
-  imageUrl: string,
-  storyId: string,
-  index: number
-) {
+async function uploadStoryImage(supabase: any, imageUrl: string, storyId: string, index: number) {
   try {
     // Convert base64 to blob
     const imageBlob = await fetch(imageUrl).then((r) => r.blob());
 
     // Upload to Supabase storage - now using a single folder per story
     const filePath = `${storyId}/${index}.png`;
-    const { error: uploadError } = await supabase.storage
-      .from("stories")
-      .upload(filePath, imageBlob, {
-        contentType: "image/png",
-        upsert: true,
-      });
+    const { error: uploadError } = await supabase.storage.from("stories").upload(filePath, imageBlob, {
+      contentType: "image/png",
+      upsert: true,
+    });
 
     if (uploadError) throw uploadError;
 
@@ -434,13 +392,7 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     if (storyError) throw storyError;
 
     // 2. Upload images using the story ID
-    const storyImages = await Promise.all(
-      story.pages.map((page, index) =>
-        page.imageUrl
-          ? uploadStoryImage(supabase, page.imageUrl, storyData.story_id, index)
-          : null
-      )
-    );
+    const storyImages = await Promise.all(story.pages.map((page, index) => (page.imageUrl ? uploadStoryImage(supabase, page.imageUrl, storyData.story_id, index) : null)));
 
     // 3. Update the story with image URLs and paths
     const updatedContent = {
@@ -485,11 +437,7 @@ async function getDefaultStoryStatus() {
   const supabase = await createClient();
 
   // Get the 'draft' status ID
-  const { data, error } = await supabase
-    .from("story_statuses")
-    .select("story_status_id")
-    .eq("story_status_name", "draft")
-    .single();
+  const { data, error } = await supabase.from("story_statuses").select("story_status_id").eq("story_status_name", "draft").single();
 
   if (error) throw error;
   return data;
@@ -497,10 +445,7 @@ async function getDefaultStoryStatus() {
 
 export async function fetchStoriesByUserId(userId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("stories")
-    .select("*")
-    .eq("story_user_id", userId);
+  const { data, error } = await supabase.from("stories").select("*").eq("story_user_id", userId);
   if (error) throw error;
   return data;
 }
@@ -509,11 +454,7 @@ export async function getStoryById(id: string) {
   const supabase = await createClient();
 
   // Get story with all required fields
-  const { data: story } = await supabase
-    .from("stories")
-    .select("*")
-    .eq("story_id", id)
-    .single();
+  const { data: story } = await supabase.from("stories").select("*").eq("story_id", id).single();
 
   if (!story) {
     return null;
@@ -564,6 +505,8 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
   } catch (error) {
     console.error("Error incrementing story usage:", error);
     return false;
+  }
+}
 
 export async function getUser() {
   try {
