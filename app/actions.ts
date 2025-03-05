@@ -445,7 +445,7 @@ async function getDefaultStoryStatus() {
 
 export async function fetchStoriesByUserId(userId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("stories").select("*").eq("story_user_id", userId);
+  const { data, error } = await supabase.from("stories").select("*").eq("story_user_id", userId).order("story_created_at", { ascending: false });
   if (error) throw error;
   return data;
 }
@@ -525,12 +525,12 @@ export async function getUser() {
 }
 
 export async function deleteStory(storyId: string) {
-  try {
+try {
     const supabase = await createClient();
 
     // Get current user
     const {
-      data: { user },
+    data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -540,8 +540,37 @@ export async function deleteStory(storyId: string) {
     if (error) throw error;
 
     return { success: true };
-  } catch (error) {
+} catch (error) {
     console.error("Error deleting story:", error);
     return { success: false, error };
-  }
+}
+}
+
+export async function updateUserSubscription(tierId: string) {
+try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+    data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+    throw new Error("User not authenticated");
+    }
+
+    // Update user metadata with new subscription tier
+    const { error } = await supabase.auth.updateUser({
+    data: {
+        subscription_tier_id: tierId,
+    },
+    });
+
+    if (error) throw error;
+
+    return { success: true };
+} catch (error) {
+    console.error("Error updating subscription:", error);
+    return { success: false, error };
+}
 }
