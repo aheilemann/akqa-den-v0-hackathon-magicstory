@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useState, useRef, MouseEvent } from "react";
 import { Story } from "@/components/organisms/story-list/story-list";
 import { deleteStory } from "@/app/actions";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, BookOpenIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TooltipContent, Tooltip, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export type StoryCardProps = {
   story: Story;
@@ -127,10 +128,43 @@ export function StoryCard({ story }: StoryCardProps) {
               }}
             />
 
-            {/* Delete Button */}
-            <Button onClick={handleDelete} disabled={isDeleting} size="icon" variant={"outline"} className="absolute rounded-full bg-white/70 top-4 right-4 z-10 h-9 w-9 backdrop-blur-sm">
-              <Trash2Icon className="h-4 w-4" />
-            </Button>
+            {/* Action Buttons */}
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/continue/${story.story_id}`);
+                      }}
+                      size="icon"
+                      variant={"outline"}
+                      className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
+                    >
+                      <BookOpenIcon className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Continue Story</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleDelete} disabled={isDeleting} size="icon" variant={"outline"} className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm">
+                      <Trash2Icon className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Story</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
             {/* Content */}
             <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-300 group-hover:translate-y-[-4px]">

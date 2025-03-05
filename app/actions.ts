@@ -453,9 +453,10 @@ export async function fetchStoriesByUserId(userId: string) {
 export async function getStoryById(id: string) {
   const supabase = await createClient();
 
-  // Get story with all required fields
-  const { data: story } = await supabase.from("stories").select("*").eq("story_id", id).single();
+  // Fetch story and continuations in parallel
+  const [storyResult, continuationsResult] = await Promise.all([supabase.from("stories").select("*").eq("story_id", id).single(), supabase.from("story_continuations").select("*").eq("story_continuation_story_id", id).order("story_continuation_created_at", { ascending: true })]);
 
+  const story = storyResult.data;
   if (!story) {
     return null;
   }
@@ -467,6 +468,7 @@ export async function getStoryById(id: string) {
     story_created_at: story.story_created_at,
     story_updated_at: story.story_updated_at,
     story_user_id: story.story_user_id,
+    continuations: continuationsResult.data || [],
   };
 }
 
@@ -525,12 +527,12 @@ export async function getUser() {
 }
 
 export async function deleteStory(storyId: string) {
-try {
+  try {
     const supabase = await createClient();
 
     // Get current user
     const {
-    data: { user },
+      data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -540,37 +542,37 @@ try {
     if (error) throw error;
 
     return { success: true };
-} catch (error) {
+  } catch (error) {
     console.error("Error deleting story:", error);
     return { success: false, error };
-}
+  }
 }
 
 export async function updateUserSubscription(tierId: string) {
-try {
+  try {
     const supabase = await createClient();
 
     // Get current user
     const {
-    data: { user },
+      data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-    throw new Error("User not authenticated");
+      throw new Error("User not authenticated");
     }
 
     // Update user metadata with new subscription tier
     const { error } = await supabase.auth.updateUser({
-    data: {
+      data: {
         subscription_tier_id: tierId,
-    },
+      },
     });
 
     if (error) throw error;
 
     return { success: true };
-} catch (error) {
+  } catch (error) {
     console.error("Error updating subscription:", error);
     return { success: false, error };
-}
+  }
 }
