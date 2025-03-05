@@ -523,3 +523,25 @@ export async function getUser() {
     return null;
   }
 }
+
+export async function deleteStory(storyId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Delete the story record - the trigger will handle storage cleanup
+    const { error } = await supabase.from("stories").delete().eq("story_id", storyId).eq("story_user_id", user.id); // Ensure user can only delete their own stories
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting story:", error);
+    return { success: false, error };
+  }
+}
