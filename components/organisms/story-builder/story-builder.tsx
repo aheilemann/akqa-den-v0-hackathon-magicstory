@@ -62,10 +62,9 @@ const StoryBuilder = () => {
     }
   };
 
-  const handleGenerateStory = useCallback(() => {
-    console.log("Show story generator: ", settings);
+  const handleGenerateStory = () => {
     setShowStoryGenerator(true);
-  }, []);
+  };
 
   useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
@@ -74,7 +73,7 @@ const StoryBuilder = () => {
   }, [USE_STATIC_STORY]);
 
   useEffect(() => {
-    handleScroll(); // Check initial state
+    handleScroll();
 
     window.addEventListener("scroll", handleScroll);
 
@@ -85,7 +84,7 @@ const StoryBuilder = () => {
 
   return (
     <div>
-      {showStoryGenerator ? (
+      {settings && showStoryGenerator ? (
         <StoryGenerator settings={settings as StoryConfig} />
       ) : (
         <Card className="max-w-4xl mx-auto p-6">
@@ -172,7 +171,7 @@ const StoryBuilder = () => {
                 !settings[currentStepData.key as keyof PartialStoryConfig]
               }
             >
-              {currentStep === steps.length - 1 ? "Done!" : "Next"}
+              {currentStep === steps.length - 1 ? "Generate story!" : "Next"}
             </Button>
           </div>
           {isButtonsSticky && <div className="h-16" />}{" "}
