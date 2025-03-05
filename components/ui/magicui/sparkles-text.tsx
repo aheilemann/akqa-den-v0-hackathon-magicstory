@@ -2,10 +2,9 @@
 
 import { motion } from "motion/react";
 import { CSSProperties, ReactElement, useEffect, useState } from "react";
-
 import { cn } from "@/lib/utils";
 
-interface Sparkle {
+type Sparkle = {
   id: string;
   x: string;
   y: string;
@@ -13,7 +12,7 @@ interface Sparkle {
   delay: number;
   scale: number;
   lifespan: number;
-}
+};
 
 const Sparkle: React.FC<Sparkle> = ({ id, x, y, color, delay, scale }) => {
   return (
@@ -39,7 +38,7 @@ const Sparkle: React.FC<Sparkle> = ({ id, x, y, color, delay, scale }) => {
   );
 };
 
-interface SparklesTextProps {
+type SparklesTextProps = {
   /**
    * @default <div />
    * @type ReactElement
@@ -82,7 +81,7 @@ interface SparklesTextProps {
     first: string;
     second: string;
   };
-}
+};
 
 export const SparklesText: React.FC<SparklesTextProps> = ({
   text,
@@ -118,7 +117,7 @@ export const SparklesText: React.FC<SparklesTextProps> = ({
           } else {
             return { ...star, lifespan: star.lifespan - 0.1 };
           }
-        }),
+        })
       );
     };
 
@@ -143,7 +142,7 @@ export const SparklesText: React.FC<SparklesTextProps> = ({
         {sparkles.map((sparkle) => (
           <Sparkle key={sparkle.id} {...sparkle} />
         ))}
-        <strong>{text}</strong>
+        {text}
       </span>
     </div>
   );
