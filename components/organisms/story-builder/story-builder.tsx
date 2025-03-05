@@ -9,6 +9,7 @@ import { type StoryConfig, type Option } from "@/lib/types";
 import { staticStory } from "@/lib/prompt/story/staticStory";
 import { steps } from "./story-builder.mocks";
 import { OptionsStatic } from "@/components/molecules/options-static";
+import { LimitReachedDialog } from "@/components/molecules/limit-reached-dialog";
 
 type PartialStoryConfig = {
   setting?: Option;
@@ -16,12 +17,13 @@ type PartialStoryConfig = {
   theme?: Option;
 };
 
-const StoryBuilder = () => {
+export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
-  const USE_STATIC_OPTIONS =
-    process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
+  const USE_STATIC_OPTIONS = process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
+  const [isLimitReachedOpen, setIsLimitReachedOpen] = useState(false);
+  const [limitValue, setLimitValue] = useState(1);
 
   useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
@@ -47,8 +49,18 @@ const StoryBuilder = () => {
     }
   };
 
+  const handleLimitReached = (limit: number) => {
+    setLimitValue(limit);
+    setIsLimitReachedOpen(true);
+  };
+
   if (settings.setting && settings.character && settings.theme) {
-    return <StoryGenerator settings={settings as StoryConfig} />;
+    return (
+      <>
+        <StoryGenerator settings={settings as StoryConfig} onLimitReached={handleLimitReached} />
+        <LimitReachedDialog isOpen={isLimitReachedOpen} onClose={() => setIsLimitReachedOpen(false)} limit={limitValue} />
+      </>
+    );
   }
 
   return (
@@ -56,72 +68,38 @@ const StoryBuilder = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <div className="space-y-1">
-            <h2 className="text-3xl font-semibold tracking-tighter">
-              {currentStepData.title}
-            </h2>
-            <p className="text-muted-foreground text-md">
-              {currentStepData.description}
-            </p>
+            <h2 className="text-3xl font-semibold tracking-tighter">{currentStepData.title}</h2>
+            <p className="text-muted-foreground text-md">{currentStepData.description}</p>
           </div>
           <div className="text-sm text-muted-foreground">
             Step {currentStep + 1} of {steps.length}
           </div>
         </div>
         <div className="w-full bg-muted rounded-full h-2">
-          <div
-            className="bg-primary rounded-full h-2 transition-all duration-300"
-            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-          />
+          <div className="bg-primary rounded-full h-2 transition-all duration-300" style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} />
         </div>
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
+        <motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
           {USE_STATIC_OPTIONS ? (
-            <OptionsStatic
-              options={currentStepData.options}
-              onSelect={(option) => handleSelect(currentStepData.key, option)}
-              selectedOption={
-                settings[currentStepData.key as keyof PartialStoryConfig] ??
-                null
-              }
-            />
+            <OptionsStatic options={currentStepData.options} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={settings[currentStepData.key as keyof PartialStoryConfig] ?? null} />
           ) : (
-            <OptionsGenerator
-              prompt={currentStepData.prompt}
-              onSelect={(option) => handleSelect(currentStepData.key, option)}
-              selectedOption={
-                settings[currentStepData.key as keyof PartialStoryConfig] ??
-                null
-              }
-            />
+            <OptionsGenerator prompt={currentStepData.prompt} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={settings[currentStepData.key as keyof PartialStoryConfig] ?? null} />
           )}
         </motion.div>
       </AnimatePresence>
 
       <div className="flex justify-between mt-8">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          disabled={currentStep === 0}
-        >
+        <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
           Back
         </Button>
-        <Button
-          onClick={handleNext}
-          disabled={!settings[currentStepData.key as keyof PartialStoryConfig]}
-        >
+        <Button onClick={handleNext} disabled={!settings[currentStepData.key as keyof PartialStoryConfig]}>
           {currentStep === steps.length - 1 ? "Generate Story" : "Next"}
         </Button>
       </div>
     </Card>
   );
-};
+}
 
-export { StoryBuilder, type PartialStoryConfig };
+export type { PartialStoryConfig };

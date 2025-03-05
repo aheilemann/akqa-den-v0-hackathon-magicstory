@@ -23,6 +23,9 @@ export const signUpAction = async (formData: FormData) => {
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        subscription_tier_id: "f4307fbd-70b9-4265-95d3-600a2f1b339d", // Free tier ID
+      },
     },
   });
 
@@ -173,37 +176,61 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
     }
 
     if (!user) {
+      console.log("No user found");
       return null;
     }
 
     // Get subscription data
-    const { data: subscriptionData } = await supabase
+    const { data: subscriptionData, error: subscriptionError } = await supabase
       .from("subscription_tiers")
       .select("*")
       .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
       .single();
 
-    // Get usage data - replace with actual query
-    const usage = {
-      used: 15, // Replace with actual query
-      total: subscriptionData?.subscription_tier_story_limit || 50,
-    };
+    if (subscriptionError) {
+      console.error("Error fetching subscription data:", subscriptionError);
+    }
 
-    return {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Get today's usage data
+    const { data: usageData, error: usageError } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", user.id).eq("date", today).single();
+
+    if (usageError && usageError.code !== "PGRST116") {
+      // Ignore "no rows returned" error
+      console.error("Error fetching usage data:", usageError);
+    }
+
+    console.log("Usage data fetched:", {
+      userId: user.id,
+      date: today,
+      stories_generated: usageData?.stories_generated,
+    });
+
+    const storiesGenerated = usageData?.stories_generated || 0;
+    const storyLimit = subscriptionData?.subscription_tier_story_limit;
+
+    const profileData = {
       user,
       subscription: subscriptionData || {
         subscription_tier_id: "free",
         subscription_tier_name: "Free",
         subscription_tier_description: "Basic features for everyone",
         subscription_tier_price: 0,
-        subscription_tier_story_limit: 10,
-        subscription_tier_continuation_limit: 20,
+        subscription_tier_story_limit: 1,
+        subscription_tier_continuation_limit: 3,
         subscription_tier_features: ["Basic features"],
         subscription_tier_created_at: null,
         subscription_tier_updated_at: null,
       },
-      usage,
+      usage: {
+        used: storiesGenerated,
+        total: storyLimit,
+      },
     };
+
+    console.log("Profile data:", profileData);
+    return profileData;
   } catch (error) {
     console.error("Error fetching profile data:", error);
     return null;
@@ -309,6 +336,34 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
+    // Check if user has reached their daily limit
+    const { data: profileData } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", user.id).eq("date", new Date().toISOString().split("T")[0]).single();
+
+    const { data: subscriptionData } = await supabase
+      .from("subscription_tiers")
+      .select("subscription_tier_story_limit")
+      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+      .single();
+
+    const storiesGenerated = profileData?.stories_generated || 0;
+    const storyLimit = subscriptionData?.subscription_tier_story_limit;
+
+    console.log("Current usage before save:", {
+      userId: user.id,
+      storiesGenerated,
+      storyLimit,
+    });
+
+    // If storyLimit is null, it means unlimited
+    // If storyLimit is a number, check if we've reached it
+    if (storyLimit !== null && storiesGenerated >= storyLimit) {
+      return {
+        success: false,
+        error: "LIMIT_REACHED",
+        limit: storyLimit,
+      };
+    }
+
     // 1. First create the story record to get the ID
     const { data: storyData, error: storyError } = await supabase
       .from("stories")
@@ -360,6 +415,17 @@ export async function saveStory(story: Story, settings: StoryConfig) {
 
     if (updateError) throw updateError;
 
+    // Increment usage after successful save
+    const usageUpdated = await incrementStoryUsage(user.id);
+    console.log("Usage increment result:", {
+      userId: user.id,
+      success: usageUpdated,
+    });
+
+    if (!usageUpdated) {
+      console.error("Failed to increment usage for user:", user.id);
+    }
+
     return { success: true, storyId: storyData.story_id };
   } catch (error) {
     console.error("Error saving story:", error);
@@ -402,4 +468,42 @@ export async function getStoryById(id: string) {
     story_updated_at: story.story_updated_at,
     story_user_id: story.story_user_id,
   };
+}
+
+export async function incrementStoryUsage(userId: string): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const today = new Date().toISOString().split("T")[0];
+
+    // Try to get existing record first
+    const { data: existingRecord } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", userId).eq("date", today).single();
+
+    if (existingRecord) {
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from("user_daily_usage")
+        .update({
+          stories_generated: (existingRecord.stories_generated || 0) + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId)
+        .eq("date", today);
+
+      if (updateError) throw updateError;
+    } else {
+      // Create new record
+      const { error: insertError } = await supabase.from("user_daily_usage").insert({
+        user_id: userId,
+        stories_generated: 1,
+        date: today,
+      });
+
+      if (insertError) throw insertError;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error incrementing story usage:", error);
+    return false;
+  }
 }
