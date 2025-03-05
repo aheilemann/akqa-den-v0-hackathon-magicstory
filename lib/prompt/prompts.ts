@@ -33,7 +33,6 @@ Style guide:
 - Soft, warm colors with dreamy lighting
 - Simple shapes with charming hidden details
 - Friendly characters with expressive features
-- Classic storybook style (like Beatrix Potter)
 - Safe and inviting atmosphere
 - Clear focal point with magical touches
 `;
