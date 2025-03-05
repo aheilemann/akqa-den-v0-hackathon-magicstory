@@ -26,7 +26,7 @@ const StoryShowcase = async () => {
 
         <Button variant="outline" asChild size="lg">
           <Link
-            href="/stories"
+            href="/create"
             className="text-sm text-muted-foreground flex gap-1 items-center group"
           >
             Get started
