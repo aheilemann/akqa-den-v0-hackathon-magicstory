@@ -10,6 +10,7 @@ import { staticStory } from "@/lib/prompt/story/staticStory";
 import { steps } from "./story-builder.mocks";
 import { OptionsStatic } from "@/components/molecules/options-static";
 import clsx from "clsx";
+import { LimitReachedDialog } from "@/components/molecules/limit-reached-dialog";
 
 type PartialStoryConfig = {
   targetAge?: Option;
@@ -18,7 +19,7 @@ type PartialStoryConfig = {
   theme?: Option;
 };
 
-const StoryBuilder = () => {
+export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
   const USE_STATIC_OPTIONS =
     process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
@@ -27,6 +28,8 @@ const StoryBuilder = () => {
   const [settings, setSettings] = useState<PartialStoryConfig>({});
   const [isButtonsSticky, setIsButtonsSticky] = useState(false);
   const [showStoryGenerator, setShowStoryGenerator] = useState(false);
+  const [isLimitReachedOpen, setIsLimitReachedOpen] = useState(false);
+  const [limitValue, setLimitValue] = useState(1);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
@@ -66,6 +69,27 @@ const StoryBuilder = () => {
     setShowStoryGenerator(true);
   };
 
+  const handleLimitReached = (limit: number) => {
+    setLimitValue(limit);
+    setIsLimitReachedOpen(true);
+  };
+
+  if (settings.setting && settings.character && settings.theme) {
+    return (
+      <>
+        <StoryGenerator
+          settings={settings as StoryConfig}
+          onLimitReached={handleLimitReached}
+        />
+        <LimitReachedDialog
+          isOpen={isLimitReachedOpen}
+          onClose={() => setIsLimitReachedOpen(false)}
+          limit={limitValue}
+        />
+      </>
+    );
+  }
+
   useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
@@ -85,7 +109,17 @@ const StoryBuilder = () => {
   return (
     <div>
       {settings && showStoryGenerator ? (
-        <StoryGenerator settings={settings as StoryConfig} />
+        <div>
+          <StoryGenerator
+            settings={settings as StoryConfig}
+            onLimitReached={handleLimitReached}
+          />
+          <LimitReachedDialog
+            isOpen={isLimitReachedOpen}
+            onClose={() => setIsLimitReachedOpen(false)}
+            limit={limitValue}
+          />
+        </div>
       ) : (
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
@@ -151,7 +185,7 @@ const StoryBuilder = () => {
               "flex justify-between mt-8",
               isButtonsSticky
                 ? "fixed bg-white bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
-                : "",
+                : ""
             )}
           >
             <Button
@@ -179,6 +213,6 @@ const StoryBuilder = () => {
       )}
     </div>
   );
-};
+}
 
-export { StoryBuilder, type PartialStoryConfig };
+export type { PartialStoryConfig };

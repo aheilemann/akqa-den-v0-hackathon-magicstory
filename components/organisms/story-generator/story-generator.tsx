@@ -15,9 +15,10 @@ import { IMAGE_PROMPT } from "@/lib/prompt";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
+  onLimitReached?: (limit: number) => void;
 }
 
-const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
+const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
   const DISABLE_IMAGE_GENERATION =
     process.env.DISABLE_IMAGE_GENERATION === "true";
 
@@ -48,7 +49,7 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
               throw new Error(`Failed to generate image ${index + 1}`);
             const data = await response.json();
             return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-          },
+          }
         );
 
         results = await Promise.all(imagePromises);
@@ -66,7 +67,7 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
         results.forEach(
           ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
             newPages[index] = { ...newPages[index], imageUrl };
-          },
+          }
         );
         return { ...prev, pages: newPages };
       });
@@ -118,6 +119,10 @@ const StoryGenerator = ({ settings }: StoryGeneratorProps) => {
       if (result.success) {
         toast.success("Story saved successfully!");
       } else {
+        if (result.error === "LIMIT_REACHED" && onLimitReached) {
+          onLimitReached(result.limit);
+          return;
+        }
         throw result.error;
       }
     } catch (error) {
