@@ -91,8 +91,10 @@ const StoryBuilder = () => {
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <div>
-                <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold tracking-tighter">
+                  {currentStepData.title}
+                </h2>
                 <p className="text-muted-foreground">
                   {currentStepData.description}
                 </p>

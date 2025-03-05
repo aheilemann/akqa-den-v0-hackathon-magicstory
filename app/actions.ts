@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Database } from "@/lib/database.types";
 import { User } from "@supabase/supabase-js";
+import { Story, StoryConfig } from "@/lib/types";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -177,13 +178,6 @@ export type ProfileData = {
     used: number;
     total: number;
   };
-  stories: Array<{
-    id: number;
-    title: string;
-    description: string;
-    emoji: string;
-    imageUrl: string;
-  }>;
 };
 
 export async function fetchProfileData(
@@ -228,23 +222,6 @@ export async function fetchProfileData(
       total: subscriptionData?.subscription_tier_story_limit || 50,
     };
 
-    // Get user's stories - replace with actual query
-    const { data: stories } = await supabase
-      .from("stories")
-      .select("*")
-      .eq("user_id", user.id);
-
-    // Transform stories to match the expected format
-    const formattedStories =
-      stories?.map((story) => ({
-        id: story.id,
-        title: story.title,
-        description: story.description,
-        emoji: story.emoji || "📖",
-        imageUrl:
-          story.image_url || "/assets/img/placeholders/book_placeholder.png",
-      })) || [];
-
     return {
       user,
       subscription: subscriptionData || {
@@ -259,7 +236,6 @@ export async function fetchProfileData(
         subscription_tier_updated_at: null,
       },
       usage,
-      stories: formattedStories,
     };
   } catch (error) {
     console.error("Error fetching profile data:", error);
@@ -326,5 +302,179 @@ export async function uploadProfileAvatar(file: File) {
   } catch (error) {
     console.error("Error uploading avatar:", error);
     return { success: false, error };
+  }
+}
+
+async function uploadStoryImage(
+  supabase: any,
+  imageUrl: string,
+  storyId: string,
+  index: number
+) {
+  try {
+    // Convert base64 to blob
+    const imageBlob = await fetch(imageUrl).then((r) => r.blob());
+
+    // Upload to Supabase storage - now using a single folder per story
+    const filePath = `${storyId}/${index}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("stories")
+      .upload(filePath, imageBlob, {
+        contentType: "image/png",
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Get the public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("stories").getPublicUrl(filePath);
+
+    return {
+      path: filePath,
+      url: publicUrl,
+    };
+  } catch (error) {
+    console.error(`Error uploading image ${index}:`, error);
+    return null;
+  }
+}
+
+export async function saveStory(story: Story, settings: StoryConfig) {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // 1. First create the story record to get the ID
+    const { data: storyData, error: storyError } = await supabase
+      .from("stories")
+      .insert({
+        story_user_id: user.id,
+        story_title: story.title,
+        story_inspiration: JSON.stringify(settings),
+        story_status: (await getDefaultStoryStatus()).story_status_id,
+        story_version: 1,
+        story_is_current: true,
+        // Initialize with empty content that we'll update after uploading images
+        story_content: {
+          title: story.title,
+          summary: story.summary,
+          targetAge: story.targetAge,
+          pages: story.pages.map((page) => ({
+            text: page.text,
+            imagePrompt: page.imagePrompt,
+            imageUrl: null,
+          })),
+        },
+      })
+      .select()
+      .single();
+
+    if (storyError) throw storyError;
+
+    // 2. Upload images using the story ID
+    const storyImages = await Promise.all(
+      story.pages.map((page, index) =>
+        page.imageUrl
+          ? uploadStoryImage(supabase, page.imageUrl, storyData.story_id, index)
+          : null
+      )
+    );
+
+    // 3. Update the story with image URLs and paths
+    const updatedContent = {
+      title: story.title,
+      summary: story.summary,
+      targetAge: story.targetAge,
+      pages: story.pages.map((page, index) => ({
+        text: page.text,
+        imagePrompt: page.imagePrompt,
+        imageUrl: storyImages[index]?.url || null,
+      })),
+    };
+
+    const { error: updateError } = await supabase
+      .from("stories")
+      .update({
+        story_content: updatedContent,
+      })
+      .eq("story_id", storyData.story_id);
+
+    if (updateError) throw updateError;
+
+    return { success: true, storyId: storyData.story_id };
+  } catch (error) {
+    console.error("Error saving story:", error);
+    return { success: false, error };
+  }
+}
+
+async function getDefaultStoryStatus() {
+  const supabase = await createClient();
+
+  // Get the 'draft' status ID
+  const { data, error } = await supabase
+    .from("story_statuses")
+    .select("story_status_id")
+    .eq("story_status_name", "draft")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchStoriesByUserId(userId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("story_user_id", userId);
+  if (error) throw error;
+  return data;
+}
+
+export async function getStoryById(id: string) {
+  const supabase = await createClient();
+
+  // Get story with all required fields
+  const { data: story } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("story_id", id)
+    .single();
+
+  if (!story) {
+    return null;
+  }
+
+  return {
+    story_id: story.story_id,
+    story_title: story.story_title,
+    story_content: story.story_content,
+    story_created_at: story.story_created_at,
+    story_updated_at: story.story_updated_at,
+    story_user_id: story.story_user_id,
+  };
+}
+
+export async function getUser() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error) return null;
+    return user;
+  } catch (error) {
+    console.error("Error in getUser:", error);
+    return null;
   }
 }

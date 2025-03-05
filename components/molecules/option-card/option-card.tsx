@@ -36,7 +36,9 @@ const OptionCard = ({
         <Card className="border-0 w-full h-full">
           <CardHeader className="text-center pb-2">
             <div className="text-4xl mb-2">{option.emoji}</div>
-            <h3 className="font-bold">{option.name}</h3>
+            <h3 className="font-semibold text-lg tracking-tighter">
+              {option.name}
+            </h3>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground whitespace-normal">
