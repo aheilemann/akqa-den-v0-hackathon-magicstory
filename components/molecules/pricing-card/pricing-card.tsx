@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export type PricingTierProps = {
   name: string;
@@ -12,9 +13,10 @@ export type PricingTierProps = {
   isPremium?: boolean;
   index: number;
   isCurrentPlan?: boolean;
+  tierId: string;
 };
 
-export function PricingCard({ name, price, description, features, isPremium = false, index, isCurrentPlan = false }: PricingTierProps) {
+export function PricingCard({ name, price, description, features, isPremium = false, index, isCurrentPlan = false, tierId }: PricingTierProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -56,9 +58,17 @@ export function PricingCard({ name, price, description, features, isPremium = fa
           </ul>
         </CardContent>
         <CardFooter className="mt-auto pt-6">
-          <Button className={cn("w-full", isPremium && "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0")} variant={isPremium ? "default" : "outline"} disabled={isCurrentPlan}>
-            {isCurrentPlan ? "Current Plan" : "Start Creating Stories"}
-          </Button>
+          {isCurrentPlan ? (
+            <Button className={cn("w-full", isPremium && "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0")} disabled>
+              Current Plan
+            </Button>
+          ) : (
+            <Link href={`/checkout/${tierId}`} className="w-full">
+              <Button className={cn("w-full", isPremium && "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0")} variant={isPremium ? "default" : "outline"}>
+                Start Creating Stories
+              </Button>
+            </Link>
+          )}
         </CardFooter>
       </Card>
     </motion.div>

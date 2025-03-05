@@ -110,6 +110,7 @@ export default function PricingContent({ initialTiers, currentSubscription }: Pr
               isPremium={index === 1}
               index={index}
               isCurrentPlan={currentSubscription?.subscription_tier_id === tier.subscription_tier_id}
+              tierId={tier.subscription_tier_id}
             />
           ))
         ) : (
