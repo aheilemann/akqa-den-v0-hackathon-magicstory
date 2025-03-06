@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { signOutAction, fetchProfileData } from "@/app/actions";
-import { CalendarDays, Mail, MapPin } from "lucide-react";
+import { CalendarDays, Mail, MapPin, BookPlus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { StoryList } from "@/components/organisms/story-list";
@@ -133,8 +133,9 @@ export function UserProfile({ initialProfileData, isPersonalProfile = true, stor
         <div className="flex items-center justify-between">
           {isPersonalProfile && (
             <Link href="/create">
-              <Button size="sm" variant="outline">
-                Add new
+              <Button size="sm" variant="outline" className="flex items-center gap-2">
+                <BookPlus className="w-4 h-4" />
+                Add new story
               </Button>
             </Link>
           )}

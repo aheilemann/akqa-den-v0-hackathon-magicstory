@@ -45,7 +45,7 @@ export function StoryList({ stories }: StoryListProps) {
           <span className="text-2xl">✨</span>
         </div>
         <h3 className="text-lg font-medium mb-2">No stories yet</h3>
-        <p className="text-sm text-muted-foreground mb-6">Create your first AI story and share it with the world</p>
+        <p className="text-sm text-muted-foreground mb-6">Create your first AI story!</p>
         <Link href="/create">
           <Button>
             <PlusIcon className="w-4 h-4 mr-2" />
