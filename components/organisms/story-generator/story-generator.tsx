@@ -243,9 +243,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
                 )}
               </div>
             ) : (
-              <div className="w-full h-full relative">
+              <div className="w-full h-full relative aspect-square">
                 <Skeleton className="absolute inset-0 rounded-lg" />
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center z-10">
                   <MagicalLoader title="" subtitle="" />
                 </div>
               </div>

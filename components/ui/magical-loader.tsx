@@ -15,13 +15,13 @@ export function MagicalLoader({
   const showText = title !== "" || subtitle !== "";
 
   return (
-    <div className="relative flex items-center justify-center min-h-[400px] overflow-hidden w-full h-full">
+    <div className="relative flex items-center justify-center w-full h-full min-h-[300px] md:min-h-[400px]">
       {/* Floating magical elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Magic wand */}
         <motion.div
           className="absolute"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 0.6 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           style={{ left: "25%", top: "20%", width: 80, height: 80 }}
@@ -40,6 +40,7 @@ export function MagicalLoader({
               width={80}
               height={80}
               className="w-full h-full object-contain"
+              priority
             />
           </motion.div>
         </motion.div>
@@ -47,7 +48,7 @@ export function MagicalLoader({
         {/* Sparkles */}
         <motion.div
           className="absolute"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 0.5 }}
           transition={{ duration: 0.3, delay: 0.3 }}
           style={{ left: "65%", top: "15%", width: 70, height: 70 }}
@@ -66,6 +67,7 @@ export function MagicalLoader({
               width={70}
               height={70}
               className="w-full h-full object-contain"
+              priority
             />
           </motion.div>
         </motion.div>
@@ -73,7 +75,7 @@ export function MagicalLoader({
         {/* Star */}
         <motion.div
           className="absolute"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 0.7 }}
           transition={{ duration: 0.3, delay: 0.4 }}
           style={{ left: "75%", top: "60%", width: 90, height: 90 }}
@@ -92,6 +94,7 @@ export function MagicalLoader({
               width={90}
               height={90}
               className="w-full h-full object-contain"
+              priority
             />
           </motion.div>
         </motion.div>
@@ -99,7 +102,7 @@ export function MagicalLoader({
         {/* Unicorn */}
         <motion.div
           className="absolute"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 0.6 }}
           transition={{ duration: 0.3, delay: 0.5 }}
           style={{ left: "15%", top: "65%", width: 100, height: 100 }}
@@ -118,6 +121,7 @@ export function MagicalLoader({
               width={100}
               height={100}
               className="w-full h-full object-contain"
+              priority
             />
           </motion.div>
         </motion.div>
@@ -125,7 +129,7 @@ export function MagicalLoader({
         {/* Dragon */}
         <motion.div
           className="absolute"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 0.5 }}
           transition={{ duration: 0.3, delay: 0.6 }}
           style={{ left: "40%", top: "75%", width: 85, height: 85 }}
@@ -144,6 +148,7 @@ export function MagicalLoader({
               width={85}
               height={85}
               className="w-full h-full object-contain"
+              priority
             />
           </motion.div>
         </motion.div>
@@ -151,9 +156,9 @@ export function MagicalLoader({
 
       {/* Central loading element */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 1, scale: 1 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
         className={cn(
           "relative z-10 flex flex-col items-center gap-5 p-6 rounded-xl",
           showText
@@ -178,6 +183,7 @@ export function MagicalLoader({
             width={80}
             height={80}
             className="object-contain"
+            priority
           />
         </motion.div>
         {showText && (
