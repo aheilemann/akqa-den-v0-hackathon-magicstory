@@ -44,23 +44,34 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             if (typeof page.imagePrompt === "undefined") {
               throw new Error("Image prompt is undefined.");
             }
+
             const response = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) })
             });
+
             if (!response.ok)
               throw new Error(`Failed to generate image ${index + 1}`);
+
             const data = await response.json();
+
+            // Log compression info if available
+            if (data.compressionRatio) {
+              console.log(
+                `Image ${index + 1}: ${data.originalSize}KB → ${data.compressedSize}KB (${data.compressionRatio}% reduction)`
+              );
+            }
+
             return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-          },
+          }
         );
 
         results = await Promise.all(imagePromises);
       } else {
         results = [
           { index: 0, imageUrl: "Static - Test Image Text #1" },
-          { index: 1, imageUrl: "Static - Test Image Text #2" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" }
         ];
       }
 
@@ -71,7 +82,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
         results.forEach(
           ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
             newPages[index] = { ...newPages[index], imageUrl };
-          },
+          }
         );
         return { ...prev, pages: newPages };
       });
@@ -92,9 +103,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt })
       });
 
       if (!response.ok) {
