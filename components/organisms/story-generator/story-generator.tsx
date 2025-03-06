@@ -32,77 +32,49 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
   const [imagesFetched, setImagesFetched] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchGeneratedIamges = useCallback(async () => {
-    if (!story) return;
-    let results;
-    if (!DISABLE_IMAGE_GENERATION) {
-      const imagePromises = story.pages.map(
-        async (page: { imagePrompt?: string }, index: number) => {
-          if (typeof page.imagePrompt === "undefined") {
-            throw new Error("Image prompt is undefined.");
-          }
-          const response = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
-          });
-          if (!response.ok)
-            throw new Error(`Failed to generate image ${index + 1}`);
-          const data = await response.json();
-          return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-        },
-      );
-
-      results = await Promise.all(imagePromises);
-    } else {
-      results = [
-        { index: 0, imageUrl: "Static - Test Image Text #1" },
-        { index: 1, imageUrl: "Static - Test Image Text #2" },
-      ];
-    }
-
-    setStory((prev: Story | null) => {
-      if (!prev) return prev;
-      const newPages = [...prev.pages];
-
-      results.forEach(
-        ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
-          newPages[index] = { ...newPages[index], imageUrl };
-        },
-      );
-      return { ...prev, pages: newPages };
-    });
-  }, []);
-
-  const generateAllImages = useCallback(() => {
+  const generateAllImages = useCallback(async () => {
     if (!story) return;
     setGeneratingImages(true);
 
     try {
-      if (settings.imageData && settings.imageData.length > 0) {
-        let images = settings.imageData;
+      let results;
+      if (!DISABLE_IMAGE_GENERATION) {
+        const imagePromises = story.pages.map(
+          async (page: { imagePrompt?: string }, index: number) => {
+            if (typeof page.imagePrompt === "undefined") {
+              throw new Error("Image prompt is undefined.");
+            }
+            const response = await fetch("/api/generate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+            });
+            if (!response.ok)
+              throw new Error(`Failed to generate image ${index + 1}`);
+            const data = await response.json();
+            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+          },
+        );
 
-        setStory((prev: Story | null) => {
-          if (!prev) return prev;
-          const newPages = [...prev.pages];
-
-          let index = 0;
-          images.forEach(({ caption, file, preview }): void => {
-            newPages[index] = {
-              ...newPages[index],
-              imageCaption: caption,
-              imageFile: file,
-              imagePreview: preview,
-            };
-            index += 1;
-          });
-          return { ...prev, pages: newPages };
-        });
-
-        return;
+        results = await Promise.all(imagePromises);
       } else {
-        fetchGeneratedIamges();
+        results = [
+          { index: 0, imageUrl: "Static - Test Image Text #1" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" },
+        ];
       }
+
+      setStory((prev: Story | null) => {
+        if (!prev) return prev;
+        const newPages = [...prev.pages];
+
+        results.forEach(
+          ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
+            newPages[index] = { ...newPages[index], imageUrl };
+          },
+        );
+        return { ...prev, pages: newPages };
+      });
     } catch (error) {
       console.error("Error generating images:", error);
     } finally {
@@ -236,20 +208,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
               <div>
                 {DISABLE_IMAGE_GENERATION ? (
                   <p>{story.pages[currentPage].imageUrl}</p>
-                ) : typeof settings.imageData !== "undefined" ? (
-                  <Image
-                    src={story.pages[currentPage].imageUrl}
-                    alt={`Story illustration ${currentPage + 1}`}
-                    fill
-                    className="object-cover rounded-lg"
-                    priority
-                  />
                 ) : (
                   <Image
-                    src={
-                      story.pages[currentPage].imagePreview ??
-                      "/placeholder.svg"
-                    }
+                    src={story.pages[currentPage].imageUrl}
                     alt={`Story illustration ${currentPage + 1}`}
                     fill
                     className="object-cover rounded-lg"

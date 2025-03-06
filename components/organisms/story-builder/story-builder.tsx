@@ -89,7 +89,6 @@ export function StoryBuilder() {
     console.log("IMAGE DATA: ", imageData);
 
     settings.imageData = imageData;
-    console.log("IMAGE DATA 2: ", settings.imageData);
   }, [imageData]);
 
   useEffect(() => {
@@ -110,14 +109,7 @@ export function StoryBuilder() {
 
   return (
     <div>
-      {imageData && (
-        <div>
-          You image data:
-          {imageData[0] ? imageData[0].caption : "No image data was found."}
-        </div>
-      )}
-
-      {!imageData && settings && showStoryGenerator && (
+      {showStoryGenerator && (
         <div>
           <StoryGenerator
             settings={settings as StoryConfig}
@@ -131,7 +123,7 @@ export function StoryBuilder() {
         </div>
       )}
 
-      {!imageData && !settings && !showStoryGenerator && (
+      {!showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -172,8 +164,9 @@ export function StoryBuilder() {
                     handleSelect(currentStepData.key, option)
                   }
                   selectedOption={
-                    settings[currentStepData.key as keyof PartialStoryConfig] ??
-                    null
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
                   }
                 />
               ) : (
@@ -183,8 +176,9 @@ export function StoryBuilder() {
                     handleSelect(currentStepData.key, option)
                   }
                   selectedOption={
-                    settings[currentStepData.key as keyof PartialStoryConfig] ??
-                    null
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
                   }
                 />
               )}

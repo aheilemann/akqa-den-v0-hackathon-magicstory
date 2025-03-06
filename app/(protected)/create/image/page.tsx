@@ -104,8 +104,6 @@ export default function ImageCaptioner() {
 
   const handleCreateStory = () => {
     setImageData(images);
-    // setImageData({ data: "TESTSETSETSET" });
-
     router.push("/create/story");
   };
 
@@ -200,11 +198,6 @@ export default function ImageCaptioner() {
           )}
         </CardContent>
         <CardFooter>
-          {/* {hasGenratedImages ? ( */}
-          {/*   <Button className="w-full" onClick={handleCreateStory}> */}
-          {/*     Generate story! */}
-          {/*   </Button> */}
-          {/* ) : ( */}
           <Button
             onClick={generateCaptions}
             disabled={images.length === 0 || loading}
@@ -222,10 +215,11 @@ export default function ImageCaptioner() {
               </>
             )}
           </Button>
-          {/* )} */}
-          <Button className="w-full" onClick={handleCreateStory}>
-            Generate story!
-          </Button>
+          {hasGenratedImages && (
+            <Button className="w-full" onClick={handleCreateStory}>
+              Generate story!
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
