@@ -51,7 +51,7 @@ export async function Footer() {
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center space-x-2">
               <Link href="/" className="text-2xl font-medium tracking-tighter">
-                StoryMagic
+                MagicStory
               </Link>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
@@ -85,7 +85,7 @@ export async function Footer() {
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
             <span className="text-muted-foreground">
-              © 2025 StoryMagic. All rights reserved.
+              © 2025 MagicStory. All rights reserved.
             </span>
           </div>
           <div className="flex items-center gap-4">
