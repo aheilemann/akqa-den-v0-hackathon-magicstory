@@ -80,13 +80,7 @@ export function StoryBuilder() {
   };
 
   useEffect(() => {
-    // TODO:
-    // - Get captions
-    // - Check if captions is falsy
-    // - If not, use the captions to auto. gen
-    // target age, setting, theme and story type.
     if (!imageData) return;
-    console.log("IMAGE DATA: ", imageData);
 
     settings.imageData = imageData;
   }, [imageData]);
