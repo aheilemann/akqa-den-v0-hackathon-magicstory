@@ -127,7 +127,7 @@ export function StoryBuilder() {
   }, [handleScroll]);
 
   return (
-    <motion.section variants={container}>
+    <motion.section variants={container} initial="hidden" animate="show">
       {showStoryGenerator && (
         <div>
           <StoryGenerator
