@@ -77,6 +77,8 @@ const Hero = () => {
     if (storyIdea.trim()) {
       localStorage.setItem("storyIdea", storyIdea.trim());
       router.push(`/create?idea=${encodeURIComponent(storyIdea.trim())}`);
+    } else {
+      router.push(`/create`);
     }
   };
 
