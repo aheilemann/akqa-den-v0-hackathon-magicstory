@@ -12,7 +12,7 @@ import Image from "next/image";
 import { saveStory } from "@/app/actions";
 import { toast } from "sonner";
 import { IMAGE_PROMPT } from "@/lib/prompt";
-import { ImageData } from "@/types/create-story";
+import { MagicalLoader } from "@/components/ui/magical-loader";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
@@ -188,21 +188,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
   }, [generateStory]);
 
   if (generatingStory) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col items-center gap-4"
-        >
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground">
-            Creating your magical story...
-          </p>
-        </motion.div>
-      </div>
-    );
+    return <MagicalLoader />;
   }
 
   if (error) {
@@ -260,7 +246,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
               <div className="w-full h-full relative">
                 <Skeleton className="absolute inset-0 rounded-lg" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <MagicalLoader title="" subtitle="" />
                 </div>
               </div>
             )}
