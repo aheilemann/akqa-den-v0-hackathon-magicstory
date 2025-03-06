@@ -28,7 +28,7 @@ const features = [
     area: "md:[grid-area:2/7/3/13] xl:[grid-area:2/5/3/9]",
   },
   {
-    title: "Professional Narration",
+    title: "Narration (coming soon)",
     description:
       "Enhance your stories with high-quality AI narration that brings characters to life. Multiple voices and emotions make each story a captivating audio experience.",
     icon: Mic,
