@@ -48,7 +48,8 @@ export function StoryBuilder() {
   const handleScroll = useCallback(() => {
     if (!contentRef.current || !buttonsRef.current) return;
 
-    const contentBottom = contentRef.current.getBoundingClientRect().bottom;
+    const contentBottom =
+      contentRef.current.getBoundingClientRect().bottom + 50;
     const windowHeight = window.innerHeight;
 
     if (contentBottom < windowHeight) {
