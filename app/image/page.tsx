@@ -1,76 +1,82 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useCallback, useRef } from "react"
-import Webcam from "react-webcam"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react"
-import Image from "next/image"
-
-interface ImageData {
-  file: File
-  preview: string
-  caption?: string
-}
+import { useState, useCallback, useRef } from "react";
+import Webcam from "react-webcam";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react";
+import Image from "next/image";
+import { ImageData } from "@/types/create-story";
 
 export default function ImageCaptioner() {
-  const [images, setImages] = useState<ImageData[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const webcamRef = useRef<Webcam>(null)
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const webcamRef = useRef<Webcam>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []);
     const newImages = files.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
-    }))
-    setImages((prev) => [...prev, ...newImages].slice(0, 5))
-  }
+    }));
+    setImages((prev) => [...prev, ...newImages].slice(0, 5));
+  };
 
   const capturePhoto = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot()
+    const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       fetch(imageSrc)
         .then((res) => res.blob())
         .then((blob) => {
-          const file = new File([blob], "webcam-photo.jpg", { type: "image/jpeg" })
-          setImages((prev) => [...prev, { file, preview: imageSrc }].slice(0, 5))
-        })
+          const file = new File([blob], "webcam-photo.jpg", {
+            type: "image/jpeg",
+          });
+          setImages((prev) =>
+            [...prev, { file, preview: imageSrc }].slice(0, 5),
+          );
+        });
     }
-  }, [])
+  }, []);
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index))
-  }
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const generateCaptions = async () => {
-    if (images.length === 0) return
+    if (images.length === 0) return;
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       const captionPromises = images.map(async (image) => {
-        const formData = new FormData()
-        formData.append("image", image.file)
+        const formData = new FormData();
+        formData.append("image", image.file);
 
         const response = await fetch("/api/generate-caption", {
           method: "POST",
           body: formData,
-        })
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to generate caption")
+          throw new Error("Failed to generate caption");
         }
 
-        const data = await response.json()
-        return data.caption
-      })
+        const data = await response.json();
+        return data.caption;
+      });
 
       const captions = await Promise.all(captionPromises);
       console.log(captions);
@@ -80,23 +86,21 @@ export default function ImageCaptioner() {
           ...image,
           caption: captions[index],
         })),
-      )
+      );
     } catch (err) {
-      setError("Error generating captions. Please try again.")
-      console.error(err)
+      setError("Error generating captions. Please try again.");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle>Upload Images to Inspire Your Story</CardTitle>
-          <CardDescription>
-            Upload or take up to 5 images
-          </CardDescription>
+          <CardDescription>Upload or take up to 5 images</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs defaultValue="upload">
@@ -113,9 +117,12 @@ export default function ImageCaptioner() {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="font-semibold">Click to upload</span> or drag and drop
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF (Max 5 images)</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      PNG, JPG or GIF (Max 5 images)
+                    </p>
                   </div>
                   <Input
                     id="image-upload"
@@ -173,11 +180,17 @@ export default function ImageCaptioner() {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-100 text-red-800 rounded-lg dark:bg-red-900 dark:text-red-200">{error}</div>
+            <div className="p-4 bg-red-100 text-red-800 rounded-lg dark:bg-red-900 dark:text-red-200">
+              {error}
+            </div>
           )}
         </CardContent>
         <CardFooter>
-          <Button onClick={generateCaptions} disabled={images.length === 0 || loading} className="w-full">
+          <Button
+            onClick={generateCaptions}
+            disabled={images.length === 0 || loading}
+            className="w-full"
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -193,6 +206,5 @@ export default function ImageCaptioner() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

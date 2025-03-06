@@ -19,12 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
-interface ImageData {
-  file: File;
-  preview: string;
-  caption?: string;
-}
+import { ImageData } from "@/types/create-story";
 
 export default function ImageCaptioner() {
   const router = useRouter();
@@ -108,7 +103,7 @@ export default function ImageCaptioner() {
   };
 
   const handleCreateStory = () => {
-    setImageData({ data: images });
+    setImageData(images);
     // setImageData({ data: "TESTSETSETSET" });
 
     router.push("/create/story");
@@ -205,29 +200,29 @@ export default function ImageCaptioner() {
           )}
         </CardContent>
         <CardFooter>
-          {hasGenratedImages ? (
-            <Button className="w-full" onClick={handleCreateStory}>
-              Generate story!
-            </Button>
-          ) : (
-            <Button
-              onClick={generateCaptions}
-              disabled={images.length === 0 || loading}
-              className="w-full"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing Images...
-                </>
-              ) : (
-                <>
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  Upload Images
-                </>
-              )}
-            </Button>
-          )}
+          {/* {hasGenratedImages ? ( */}
+          {/*   <Button className="w-full" onClick={handleCreateStory}> */}
+          {/*     Generate story! */}
+          {/*   </Button> */}
+          {/* ) : ( */}
+          <Button
+            onClick={generateCaptions}
+            disabled={images.length === 0 || loading}
+            className="w-full"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing Images...
+              </>
+            ) : (
+              <>
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Upload Images
+              </>
+            )}
+          </Button>
+          {/* )} */}
           <Button className="w-full" onClick={handleCreateStory}>
             Generate story!
           </Button>

@@ -1,7 +1,12 @@
+import { ImageData } from "@/types/create-story";
+
 export interface StoryPage {
   text: string;
-  imagePrompt: string;
+  imagePrompt?: string;
   imageUrl?: string;
+  imageCaption?: string;
+  imagePreview?: string;
+  imageFile?: File;
 }
 
 export interface Story {
@@ -12,6 +17,7 @@ export interface Story {
 }
 
 export interface StoryConfig {
+  imageData?: ImageData[];
   target_age: {
     name: string;
     description: string;

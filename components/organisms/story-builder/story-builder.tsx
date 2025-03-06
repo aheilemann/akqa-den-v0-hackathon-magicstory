@@ -12,12 +12,14 @@ import { OptionsStatic } from "@/components/molecules/options-static";
 import clsx from "clsx";
 import { LimitReachedDialog } from "@/components/molecules/limit-reached-dialog";
 import { useCreateContext } from "@/context/CreateStoryContext";
+import { ImageData } from "@/types/create-story";
 
 type PartialStoryConfig = {
   targetAge?: Option;
   setting?: Option;
   character?: Option;
   theme?: Option;
+  imageData?: ImageData[];
 };
 
 export function StoryBuilder() {
@@ -85,6 +87,9 @@ export function StoryBuilder() {
     // target age, setting, theme and story type.
     if (!imageData) return;
     console.log("IMAGE DATA: ", imageData);
+
+    settings.imageData = imageData;
+    console.log("IMAGE DATA 2: ", settings.imageData);
   }, [imageData]);
 
   useEffect(() => {
@@ -105,16 +110,14 @@ export function StoryBuilder() {
 
   return (
     <div>
-      {imageData && imageData.data && (
+      {imageData && (
         <div>
-          You image data:{" "}
-          {imageData.data[0]
-            ? imageData.data[0].caption
-            : "No image data was found."}
+          You image data:
+          {imageData[0] ? imageData[0].caption : "No image data was found."}
         </div>
       )}
 
-      {(!imageData || !imageData.data) && settings && showStoryGenerator && (
+      {!imageData && settings && showStoryGenerator && (
         <div>
           <StoryGenerator
             settings={settings as StoryConfig}
@@ -128,7 +131,7 @@ export function StoryBuilder() {
         </div>
       )}
 
-      {(!imageData || !imageData.data) && !settings && !showStoryGenerator && (
+      {!imageData && !settings && !showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
