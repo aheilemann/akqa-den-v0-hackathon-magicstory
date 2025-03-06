@@ -11,7 +11,7 @@ Main Character: ${settings.character.name}
 ${settings.character.description}
 Character traits: ${settings.character.traits.join(", ")}
 
-Make the story match the list of captions (which matches each page): ${
+Also use the these captions as an inspiration for the story:  ${
   typeof settings.imageData !== "undefined" &&
   settings.imageData?.map((image) => image.caption ?? image.caption).join(", ")
 }
