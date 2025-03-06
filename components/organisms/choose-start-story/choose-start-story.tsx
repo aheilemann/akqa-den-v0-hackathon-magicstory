@@ -18,8 +18,8 @@ const ChooseStartStory = () => {
       <Card className="max-w-4xl mx-auto p-6">
         <div className="mb-6">
           <div className="flex flex-col justify-between items-center mb-4">
-            <h2 className="w-full text-2xl font-bold tracking-tighter">
-              Do you want to start your story with a drawing?
+            <h2 className="w-full text-2xl font-bold">
+              Do you want to start your story with your own images?
             </h2>
             <p className="w-full text-muted-foreground">
               Please choose how you want to start your story
@@ -29,7 +29,7 @@ const ChooseStartStory = () => {
 
         <div className="flex flex-row w-fll gap-6 min-h-60">
           <Card
-            className="flex justify-center items-center w-full cursor-pointer hover:bg-gray-100"
+            className="flex justify-center items-center w-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={handleStartWithDrawing}
           >
             <div>
@@ -38,7 +38,7 @@ const ChooseStartStory = () => {
           </Card>
 
           <Card
-            className="flex justify-center items-center w-full cursor-pointer hover:bg-gray-100"
+            className="flex justify-center items-center w-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={handleStartWithoutDrawing}
           >
             <div>
