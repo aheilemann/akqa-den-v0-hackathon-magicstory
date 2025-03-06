@@ -26,6 +26,7 @@ import {
 
 export type StoryCardProps = {
   story: Story;
+  showContinueButton?: boolean;
 };
 
 const storyItem = {
@@ -40,7 +41,10 @@ const storyItem = {
   },
 };
 
-export function StoryCard({ story }: StoryCardProps) {
+export function StoryCard({
+  story,
+  showContinueButton = true,
+}: StoryCardProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -179,12 +183,6 @@ export function StoryCard({ story }: StoryCardProps) {
 
           {/* Emoji Badge - Updated background color for light mode */}
           <div className="absolute top-4 left-4">
-            <div className="bg-black/80 dark:bg-background/80 backdrop-blur-sm p-2.5 rounded-full border border-white/20 transition-all duration-300 group-hover:scale-110">
-              <span className="text-base text-white inline-block animate-none group-hover:animate-[wiggle_0.3s_ease-in-out]">
-                {story.emoji || "✨"}
-              </span>
-            </div>
-
             {/* Card Content Container */}
             <div className="relative w-full h-full rounded-[5px] overflow-hidden bg-card">
               {/* Background Image with Gradient */}
@@ -259,14 +257,17 @@ export function StoryCard({ story }: StoryCardProps) {
                 </h4>
               </div>
             </div>
-            <Button
-              onClick={handleContinue}
-              variant="outline"
-              className="w-full gap-2"
-            >
-              <BookOpenIcon className="h-4 w-4" />
-              Continue Story
-            </Button>
+
+            {showContinueButton && (
+              <Button
+                onClick={handleContinue}
+                variant="outline"
+                className="w-full gap-2"
+              >
+                <BookOpenIcon className="h-4 w-4" />
+                Continue Story
+              </Button>
+            )}
           </div>
         </div>
       </motion.div>

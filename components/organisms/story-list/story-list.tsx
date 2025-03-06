@@ -33,6 +33,7 @@ export type StoryListProps = {
     md?: number;
     lg?: number;
   };
+  showContinueButton?: boolean;
 };
 
 export function StoryList({
@@ -43,6 +44,7 @@ export function StoryList({
     md: 3,
     lg: 3,
   },
+  showContinueButton = true,
 }: StoryListProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
@@ -109,7 +111,7 @@ export function StoryList({
       <div className={getGridClasses()}>
         {stories.map((story) => (
           <motion.div key={story.story_id} variants={storyItem}>
-            <StoryCard story={story} />
+            <StoryCard story={story} showContinueButton={showContinueButton} />
           </motion.div>
         ))}
       </div>

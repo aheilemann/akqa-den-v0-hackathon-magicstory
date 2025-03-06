@@ -39,6 +39,7 @@ const StoryShowcase = async () => {
         stories={stories}
         rowCount={{ sm: 2, md: 4, lg: 4 }}
         hideHeadline
+        showContinueButton={false}
       />
     </section>
   );
