@@ -2,7 +2,6 @@ import { openai } from "@ai-sdk/openai";
 import { experimental_generateImage as generateImage } from "ai";
 
 export const preferredRegion = "fra1"; // Frankfurt
-export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
