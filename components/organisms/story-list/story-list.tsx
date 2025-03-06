@@ -1,8 +1,11 @@
-import { motion } from "framer-motion";
+"use client";
+
+import { motion, useInView } from "framer-motion";
 import { StoryCard } from "@/components/molecules/story-card";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useRef } from "react";
 
 export type Story = {
   story_id: string;
@@ -24,18 +27,52 @@ export type Story = {
 
 export type StoryListProps = {
   stories: Story[];
+  hideHeadline?: boolean;
+  rowCount?: {
+    sm?: number;
+    md?: number;
+    lg?: number;
+  };
+  showContinueButton?: boolean;
 };
 
-export function StoryList({ stories }: StoryListProps) {
+export function StoryList({
+  stories,
+  hideHeadline = false,
+  rowCount = {
+    sm: 2,
+    md: 3,
+    lg: 3,
+  },
+  showContinueButton = true,
+}: StoryListProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  const getGridClasses = () => {
+    const baseClasses = "grid gap-4";
+    const smCols = `sm:grid-cols-${rowCount.sm}`;
+    const mdCols = `md:grid-cols-${rowCount.md}`;
+    const lgCols = `lg:grid-cols-${rowCount.lg}`;
+    return `${baseClasses} ${smCols} ${mdCols} ${lgCols}`;
+  };
+
   const storiesContainer = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, y: 20 },
     show: {
       opacity: 1,
+      y: 0,
       transition: {
+        duration: 0.5,
         staggerChildren: 0.25,
         delayChildren: 0.1,
       },
     },
+  };
+
+  const storyItem = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 },
   };
 
   if (!stories || stories.length === 0) {
@@ -45,7 +82,9 @@ export function StoryList({ stories }: StoryListProps) {
           <span className="text-2xl">✨</span>
         </div>
         <h3 className="text-lg font-medium mb-2">No stories yet</h3>
-        <p className="text-sm text-muted-foreground mb-6">Create your first AI story!</p>
+        <p className="text-sm text-muted-foreground mb-6">
+          Create your first AI story and share it with the world
+        </p>
         <Link href="/create">
           <Button>
             <PlusIcon className="w-4 h-4 mr-2" />
@@ -57,12 +96,23 @@ export function StoryList({ stories }: StoryListProps) {
   }
 
   return (
-    <motion.div variants={storiesContainer}>
-      {/* TODO: Add pagination and infinite scroll to load more stories */}
-      <h3 className="text-lg font-medium tracking-tight mb-4">Stories {"(" + stories.length + ")"}</h3>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <motion.div
+      ref={ref}
+      variants={storiesContainer}
+      initial="hidden"
+      animate={isInView ? "show" : "hidden"}
+      className="w-full"
+    >
+      {!hideHeadline && (
+        <h3 className="text-lg font-medium tracking-tight mb-4">
+          Stories {"(" + stories.length + ")"}
+        </h3>
+      )}
+      <div className={getGridClasses()}>
         {stories.map((story) => (
-          <StoryCard key={story.story_id} story={story} />
+          <motion.div key={story.story_id} variants={storyItem}>
+            <StoryCard story={story} showContinueButton={showContinueButton} />
+          </motion.div>
         ))}
       </div>
     </motion.div>

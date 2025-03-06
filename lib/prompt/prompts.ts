@@ -34,7 +34,7 @@ For each theme include:
 Format as JSON array. Keep themes age-appropriate and positive.`;
 
 export const IMAGE_PROMPT = (setting: string) => `
-Create a whimsical children's book illustration for:
+Create a whimsical children's illustration for:
 ${setting}
 
 Style guide:

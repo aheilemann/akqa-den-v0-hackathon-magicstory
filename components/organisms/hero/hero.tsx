@@ -1,157 +1,204 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Canvas } from "@react-three/fiber";
-import { SparkleModel } from "./sparkle-model";
-import { useRef, useEffect, useState } from "react";
-import { Preload } from "@react-three/drei";
-import { Environment } from "@react-three/drei";
+import { SparklesText } from "@/components/ui/magicui/sparkles-text";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { Wand2 } from "lucide-react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { adventureEmojis } from "./adventureEmojis";
+import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
+import { cn } from "@/lib/utils";
+import { AnimatedBackground } from "./animated-background";
+
+const placeholderTexts = [
+  "A magical unicorn in a candy forest...",
+  "A brave little robot learning to fly...",
+  "A friendly dragon's first day at school...",
+  "An adventurous cat discovering a secret garden...",
+];
 
 const Hero = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [storyIdea, setStoryIdea] = useState("");
+  const [currentPlaceholder, setCurrentPlaceholder] = useState("");
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [currentEmoji, setCurrentEmoji] = useState(adventureEmojis[0]);
+  const lastPosition = useRef({ x: 0, y: 0 });
+  const [showEmoji, setShowEmoji] = useState(false);
+  const router = useRouter();
+
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-      setMousePosition({ x, y });
-    };
+    const typingInterval = setInterval(() => {
+      if (charIndex < placeholderTexts[placeholderIndex].length) {
+        setCurrentPlaceholder((prev) =>
+          placeholderTexts[placeholderIndex].slice(0, charIndex + 1)
+        );
+        setCharIndex((prev) => prev + 1);
+      } else {
+        clearInterval(typingInterval);
+        setTimeout(() => {
+          setCurrentPlaceholder("");
+          setCharIndex(0);
+          setPlaceholderIndex((prev) => (prev + 1) % placeholderTexts.length);
+        }, 2000);
+      }
+    }, 50);
 
-    const handleScroll = () => {
-      setScrollPosition(window.scrollY);
-    };
+    return () => clearInterval(typingInterval);
+  }, [charIndex, placeholderIndex]);
 
-    const updateViewport = () => {
-      setViewport({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const x = e.clientX;
+    const y = e.clientY;
 
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("resize", updateViewport);
+    const distance = Math.sqrt(
+      Math.pow(x - lastPosition.current.x, 2) +
+        Math.pow(y - lastPosition.current.y, 2)
+    );
 
-    updateViewport();
+    if (distance > 100) {
+      setCurrentEmoji(
+        adventureEmojis[Math.floor(Math.random() * adventureEmojis.length)]
+      );
+      lastPosition.current = { x, y };
+    }
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("resize", updateViewport);
-    };
-  }, []);
-
-  // Get responsive positions based on screen size
-  const getSparklePositions = () => {
-    const isMobile = viewport.width < 768;
-    const isTablet = viewport.width < 1024;
-
-    const baseScale = isMobile ? 0.25 : isTablet ? 0.3 : 0.4;
-
-    // Define positions and individual scales for each star
-    const starsConfig = isMobile
-      ? [
-          { pos: [-1.2, 0.8, -2], scale: baseScale * 1.2 },
-          { pos: [1.3, -0.7, -1], scale: baseScale * 0.7 },
-          { pos: [0, 1.2, -1.5], scale: baseScale * 1.4 },
-          { pos: [-0.8, -1.1, -1], scale: baseScale * 0.8 },
-          { pos: [1.1, 1.1, -2], scale: baseScale },
-          { pos: [-1.4, 0.3, -1.2], scale: baseScale * 0.9 },
-          { pos: [0.7, -0.4, -1.8], scale: baseScale * 1.1 },
-          { pos: [-0.5, 0.6, -1.3], scale: baseScale * 0.6 }
-        ]
-      : [
-          { pos: [-2.5, 1.8, -2], scale: baseScale * 1.2 },
-          { pos: [2.8, -1.3, -1], scale: baseScale * 0.7 },
-          { pos: [0, 2.5, -3], scale: baseScale * 1.4 },
-          { pos: [-2, -1.8, -2], scale: baseScale * 0.8 },
-          { pos: [2.2, 1.8, -2.5], scale: baseScale },
-          { pos: [-4.1, 0.7, -1.5], scale: baseScale * 0.9 },
-          { pos: [1.5, -0.8, -2.2], scale: baseScale * 1.1 },
-          { pos: [-1.2, 1.4, -1.8], scale: baseScale * 0.6 }
-        ];
-
-    return {
-      starsConfig: starsConfig as {
-        pos: [number, number, number];
-        scale: number;
-      }[]
-    };
+    setMousePosition({ x, y });
   };
 
-  const { starsConfig } = getSparklePositions();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (storyIdea.trim()) {
+      localStorage.setItem("storyIdea", storyIdea.trim());
+      router.push(`/create?idea=${encodeURIComponent(storyIdea.trim())}`);
+    }
+  };
 
   return (
-    <section
-      ref={containerRef}
-      id="hero-section"
-      className="relative w-full h-[90vh] flex lg:items-center justify-center overflow-hidden bg-black"
-    >
-      {/* 3D Background */}
-      <div className="absolute inset-0">
-        <Canvas
-          camera={{ position: [0, 0, viewport.width < 768 ? 3 : 5], fov: 50 }}
+    <section className="relative w-full h-[90vh] flex justify-center overflow-hidden pt-20">
+      <AnimatedBackground />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent pointer-events-none z-[1]" />
+      <div
+        ref={containerRef}
+        className="flex items-center flex-col relative z-10 w-full max-w-5xl px-6 xl:px-0"
+      >
+        <motion.div
+          className="flex flex-col gap-4 items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Environment preset="forest" blur={0.6} background={true} />
+          <div
+            className={cn(
+              "group rounded-full border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+            )}
+          >
+            <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400 text-sm">
+              <span>✨ Empower your imagination</span>
+            </AnimatedShinyText>
+          </div>
+          <motion.h1
+            className="text-3xl font-semibold sm:text-6xl md:text-7xl mb-6 tracking-tighter leading-tight max-w-3xl text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            Create and bring children's stories to
+            <div className="inline-block mx-3 relative">
+              <SparklesText
+                text="life"
+                className="text-3xl sm:text-6xl md:text-7xl font-extrabold relative"
+                data-text="life"
+              />
+            </div>
+            with AI
+          </motion.h1>
+        </motion.div>
 
-          {/* Subtle front ambient light */}
-          <ambientLight intensity={0.5} />
+        <motion.p
+          className="text-base md:text-md text-muted-foreground max-w-xl text-center mb-8 tracking-tight"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          We help you transform ideas into interactive <b>digital stories</b>.
+          Easily create magical stories with professional narration, all with a
+          few simple clicks. <b>Perfect</b> for parents, teachers, and
+          storytellers.
+        </motion.p>
 
-          {/* Main backlight */}
-          <spotLight
-            position={[0, 5, -200]}
-            angle={0.5}
-            penumbra={1}
-            intensity={2}
-            castShadow
+        <motion.form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-2 w-full max-w-2xl relative mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <Input
+            value={storyIdea}
+            onChange={(e) => setStoryIdea(e.target.value)}
+            placeholder={currentPlaceholder}
+            className="h-12 text-sm rounded-lg px-4 py-4 transition-shadow duration-500 ease-out shadow-[0_0_20px_rgba(0,0,0,0.05)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+            maxLength={100}
+            onMouseEnter={() => setShowEmoji(true)}
+            onMouseLeave={() => setShowEmoji(false)}
+            onMouseMove={handleMouseMove}
           />
-
-          {/* Top rim light */}
-          <pointLight position={[0, 8, -10]} intensity={0.5} color="#6b7280" />
-
-          {/* Subtle side fill light */}
-          <pointLight position={[-5, 0, -4]} intensity={0.5} color="#4b5563" />
-
-          {starsConfig.map((config, index) => (
-            <SparkleModel
-              key={index}
-              position={config.pos}
-              rotationOffset={index * 2}
-              mousePosition={mousePosition}
-              scrollPosition={scrollPosition}
-              scale={config.scale}
-            />
-          ))}
-
-          <Preload all />
-        </Canvas>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 text-white w-full max-w-5xl px-6 pt-24 lg:pt-0 xl:px-0">
-        <div className="flex flex-col gap-4 items-start">
-          <Badge className="w-fit">✨Powered by AI</Badge>
-          <h1 className="text-3xl md:text-6xl mb-6 tracking-tighter max-w-xl">
-            Create and bring children's stories to life with AI
-          </h1>
-        </div>
-
-        <p className="text-base md:text-md text-gray-100 max-w-xl">
-          Transform your ideas into interactive digital stories in minutes.
-          Easily create immersive magical stories with custom characters and
-          professional narration — all with a few simple clicks. Perfect for
-          parents, teachers, and storytellers.
-        </p>
-        <Button asChild size="lg" className="mt-8">
-          <Link href="/create">Get started</Link>
-        </Button>
+          <AnimatePresence>
+            {showEmoji && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{
+                  duration: 0.15,
+                  ease: "easeOut",
+                }}
+                className="pointer-events-none fixed z-50 flex flex-col items-center"
+                style={{
+                  position: "fixed",
+                  left: mousePosition.x,
+                  top: mousePosition.y - 90,
+                  transform: "translateX(-50%)",
+                }}
+              >
+                <div className="relative">
+                  <div className="absolute -bottom-1 left-1 w-2 h-2 bg-foreground/60 backdrop-blur-sm rounded-full" />
+                  <div className="absolute -bottom-3 left-0 w-1.5 h-1.5 bg-foreground/60 backdrop-blur-sm rounded-full" />
+                  <div className="w-12 h-12 bg-foreground/10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                    <motion.span
+                      key={currentEmoji}
+                      initial={{ scale: 0.5, y: 10 }}
+                      animate={{ scale: 1, y: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 10,
+                        mass: 0.5,
+                      }}
+                      className="text-xl relative z-10"
+                    >
+                      {currentEmoji}
+                    </motion.span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <Button type="submit" size="lg" className="h-12 group">
+            <Wand2 className="mr-1 h-5 w-5 group-hover:animate-shake" />
+            Create story
+          </Button>
+        </motion.form>
       </div>
     </section>
   );

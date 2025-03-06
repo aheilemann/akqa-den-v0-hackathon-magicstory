@@ -15,7 +15,11 @@ export const signUpAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect("error", "/sign-up", "Email and password are required");
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Email and password are required"
+    );
   }
 
   const { error } = await supabase.auth.signUp({
@@ -33,7 +37,11 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
-    return encodedRedirect("success", "/sign-up", "Thanks for signing up! Please check your email for a verification link.");
+    return encodedRedirect(
+      "success",
+      "/sign-up",
+      "Thanks for signing up! Please check your email for a verification link."
+    );
   }
 };
 
@@ -70,14 +78,22 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.message);
-    return encodedRedirect("error", "/forgot-password", "Could not reset password");
+    return encodedRedirect(
+      "error",
+      "/forgot-password",
+      "Could not reset password"
+    );
   }
 
   if (callbackUrl) {
     return redirect(callbackUrl);
   }
 
-  return encodedRedirect("success", "/forgot-password", "Check your email for a link to reset your password.");
+  return encodedRedirect(
+    "success",
+    "/forgot-password",
+    "Check your email for a link to reset your password."
+  );
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
@@ -87,7 +103,11 @@ export const resetPasswordAction = async (formData: FormData) => {
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!password || !confirmPassword) {
-    encodedRedirect("error", "/reset-password", "Password and confirm password are required");
+    encodedRedirect(
+      "error",
+      "/reset-password",
+      "Password and confirm password are required"
+    );
   }
 
   if (password !== confirmPassword) {
@@ -111,13 +131,17 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
-export type SubscriptionTier = Database["public"]["Tables"]["subscription_tiers"]["Row"];
+export type SubscriptionTier =
+  Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
 export async function fetchTiers() {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.from("subscription_tiers").select("*").order("subscription_tier_price");
+    const { data, error } = await supabase
+      .from("subscription_tiers")
+      .select("*")
+      .order("subscription_tier_price");
 
     if (error) throw error;
     return data as SubscriptionTier[];
@@ -163,14 +187,20 @@ export type ProfileData = {
   };
 };
 
-export async function fetchProfileData(id?: string): Promise<ProfileData | null> {
+export async function fetchProfileData(
+  id?: string
+): Promise<ProfileData | null> {
   try {
     const supabase = await createClient();
 
     // Get user data - either by ID or current user
     let user;
     if (id) {
-      const { data: userData } = await supabase.from("users").select("*").eq("id", id).single();
+      const { data: userData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", id)
+        .single();
       user = userData;
     } else {
       const {
@@ -188,7 +218,10 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
     const { data: subscriptionData, error: subscriptionError } = await supabase
       .from("subscription_tiers")
       .select("*")
-      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+      .eq(
+        "subscription_tier_id",
+        user.user_metadata?.subscription_tier_id || "free"
+      )
       .single();
 
     if (subscriptionError) {
@@ -198,7 +231,12 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
     const today = new Date().toISOString().split("T")[0];
 
     // Get today's usage data
-    const { data: usageData, error: usageError } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", user.id).eq("date", today).single();
+    const { data: usageData, error: usageError } = await supabase
+      .from("user_daily_usage")
+      .select("stories_generated")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single();
 
     if (usageError && usageError.code !== "PGRST116") {
       // Ignore "no rows returned" error
@@ -206,7 +244,14 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
     }
 
     // Get continuation count
-    const { count: continuationCount } = await supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today);
+    const { count: continuationCount } = await supabase
+      .from("story_continuations")
+      .select("story_continuation_story_id, stories!inner(story_user_id)", {
+        count: "exact",
+        head: true,
+      })
+      .eq("stories.story_user_id", user.id)
+      .gte("story_continuation_created_at", today);
 
     console.log("Usage data fetched:", {
       userId: user.id,
@@ -217,7 +262,8 @@ export async function fetchProfileData(id?: string): Promise<ProfileData | null>
 
     const storiesGenerated = usageData?.stories_generated || 0;
     const storyLimit = subscriptionData?.subscription_tier_story_limit;
-    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
+    const continuationLimit =
+      subscriptionData?.subscription_tier_continuation_limit;
 
     const profileData = {
       user,
@@ -283,9 +329,11 @@ export async function uploadProfileAvatar(file: File) {
     const filePath = `${user.id}.${fileExt}`;
 
     // Upload the file
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, {
-      upsert: true,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, {
+        upsert: true,
+      });
 
     if (uploadError) throw uploadError;
 
@@ -310,17 +358,24 @@ export async function uploadProfileAvatar(file: File) {
   }
 }
 
-async function uploadStoryImage(supabase: any, imageUrl: string, storyId: string, index: number) {
+async function uploadStoryImage(
+  supabase: any,
+  imageUrl: string,
+  storyId: string,
+  index: number
+) {
   try {
     // Convert base64 to blob
     const imageBlob = await fetch(imageUrl).then((r) => r.blob());
 
     // Upload to Supabase storage - now using a single folder per story
     const filePath = `${storyId}/${index}.png`;
-    const { error: uploadError } = await supabase.storage.from("stories").upload(filePath, imageBlob, {
-      contentType: "image/png",
-      upsert: true,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from("stories")
+      .upload(filePath, imageBlob, {
+        contentType: "image/png",
+        upsert: true,
+      });
 
     if (uploadError) throw uploadError;
 
@@ -350,12 +405,20 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     if (!user) throw new Error("User not authenticated");
 
     // Check if user has reached their daily limit
-    const { data: profileData } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", user.id).eq("date", new Date().toISOString().split("T")[0]).single();
+    const { data: profileData } = await supabase
+      .from("user_daily_usage")
+      .select("stories_generated")
+      .eq("user_id", user.id)
+      .eq("date", new Date().toISOString().split("T")[0])
+      .single();
 
     const { data: subscriptionData } = await supabase
       .from("subscription_tiers")
       .select("subscription_tier_story_limit")
-      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+      .eq(
+        "subscription_tier_id",
+        user.user_metadata?.subscription_tier_id || "free"
+      )
       .single();
 
     const storiesGenerated = profileData?.stories_generated || 0;
@@ -405,7 +468,13 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     if (storyError) throw storyError;
 
     // 2. Upload images using the story ID
-    const storyImages = await Promise.all(story.pages.map((page, index) => (page.imageUrl ? uploadStoryImage(supabase, page.imageUrl, storyData.story_id, index) : null)));
+    const storyImages = await Promise.all(
+      story.pages.map((page, index) =>
+        page.imageUrl
+          ? uploadStoryImage(supabase, page.imageUrl, storyData.story_id, index)
+          : null
+      )
+    );
 
     // 3. Update the story with image URLs and paths
     const updatedContent = {
@@ -450,7 +519,11 @@ async function getDefaultStoryStatus() {
   const supabase = await createClient();
 
   // Get the 'draft' status ID
-  const { data, error } = await supabase.from("story_statuses").select("story_status_id").eq("story_status_name", "draft").single();
+  const { data, error } = await supabase
+    .from("story_statuses")
+    .select("story_status_id")
+    .eq("story_status_name", "draft")
+    .single();
 
   if (error) throw error;
   return data;
@@ -458,7 +531,10 @@ async function getDefaultStoryStatus() {
 
 export async function fetchStoriesByUserId(userId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("stories").select("*").eq("story_user_id", userId).order("story_created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("story_user_id", userId);
   if (error) throw error;
   return data;
 }
@@ -466,10 +542,22 @@ export async function fetchStoriesByUserId(userId: string) {
 export async function getStoryById(id: string) {
   const supabase = await createClient();
 
+  // Get story with all required fields
+  const { data: story } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("story_id", id)
+    .single();
   // Fetch story and continuations in parallel
-  const [storyResult, continuationsResult] = await Promise.all([supabase.from("stories").select("*").eq("story_id", id).single(), supabase.from("story_continuations").select("*").eq("story_continuation_story_id", id).order("story_continuation_created_at", { ascending: true })]);
+  const [storyResult, continuationsResult] = await Promise.all([
+    supabase.from("stories").select("*").eq("story_id", id).single(),
+    supabase
+      .from("story_continuations")
+      .select("*")
+      .eq("story_continuation_story_id", id)
+      .order("story_continuation_created_at", { ascending: true }),
+  ]);
 
-  const story = storyResult.data;
   if (!story) {
     return null;
   }
@@ -491,7 +579,12 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
     const today = new Date().toISOString().split("T")[0];
 
     // Try to get existing record first
-    const { data: existingRecord } = await supabase.from("user_daily_usage").select("stories_generated").eq("user_id", userId).eq("date", today).single();
+    const { data: existingRecord } = await supabase
+      .from("user_daily_usage")
+      .select("stories_generated")
+      .eq("user_id", userId)
+      .eq("date", today)
+      .single();
 
     if (existingRecord) {
       // Update existing record
@@ -507,11 +600,13 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
       if (updateError) throw updateError;
     } else {
       // Create new record
-      const { error: insertError } = await supabase.from("user_daily_usage").insert({
-        user_id: userId,
-        stories_generated: 1,
-        date: today,
-      });
+      const { error: insertError } = await supabase
+        .from("user_daily_usage")
+        .insert({
+          user_id: userId,
+          stories_generated: 1,
+          date: today,
+        });
 
       if (insertError) throw insertError;
     }
@@ -550,7 +645,11 @@ export async function deleteStory(storyId: string) {
     if (!user) throw new Error("User not authenticated");
 
     // Delete the story record - the trigger will handle storage cleanup
-    const { error } = await supabase.from("stories").delete().eq("story_id", storyId).eq("story_user_id", user.id); // Ensure user can only delete their own stories
+    const { error } = await supabase
+      .from("stories")
+      .delete()
+      .eq("story_id", storyId)
+      .eq("story_user_id", user.id); // Ensure user can only delete their own stories
 
     if (error) throw error;
 
@@ -590,7 +689,21 @@ export async function updateUserSubscription(tierId: string) {
   }
 }
 
-export async function incrementStoryContinuation(storyId: string, continuationType: string, customPrompt?: string): Promise<boolean> {
+export async function getStories(limit: number = 4) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*")
+    .order("story_created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data;
+}
+export async function incrementStoryContinuation(
+  storyId: string,
+  continuationType: string,
+  customPrompt?: string
+): Promise<boolean> {
   try {
     const supabase = await createClient();
 
@@ -601,38 +714,58 @@ export async function incrementStoryContinuation(storyId: string, continuationTy
     if (!user) throw new Error("User not authenticated");
 
     // Get the story to verify ownership
-    const { data: storyData } = await supabase.from("stories").select("story_user_id").eq("story_id", storyId).single();
+    const { data: storyData } = await supabase
+      .from("stories")
+      .select("story_user_id")
+      .eq("story_id", storyId)
+      .single();
 
     if (!storyData) throw new Error("Story not found");
     if (storyData.story_user_id !== user.id) throw new Error("Unauthorized");
 
     // Check if user has reached their daily continuation limit
     const today = new Date().toISOString().split("T")[0];
-    const { count: continuationCount } = await supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today);
+    const { count: continuationCount } = await supabase
+      .from("story_continuations")
+      .select("story_continuation_story_id, stories!inner(story_user_id)", {
+        count: "exact",
+        head: true,
+      })
+      .eq("stories.story_user_id", user.id)
+      .gte("story_continuation_created_at", today);
 
     // Get user's subscription tier
     const { data: subscriptionData } = await supabase
       .from("subscription_tiers")
       .select("subscription_tier_continuation_limit")
-      .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
+      .eq(
+        "subscription_tier_id",
+        user.user_metadata?.subscription_tier_id || "free"
+      )
       .single();
 
-    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
+    const continuationLimit =
+      subscriptionData?.subscription_tier_continuation_limit;
     const currentContinuations = continuationCount || 0;
 
     // If continuationLimit is null, it means unlimited
     // If continuationLimit is a number, check if we've reached it
-    if (continuationLimit !== null && currentContinuations >= continuationLimit) {
+    if (
+      continuationLimit !== null &&
+      currentContinuations >= continuationLimit
+    ) {
       return false;
     }
 
     // Record the continuation
-    const { error: continuationError } = await supabase.from("story_continuations").insert({
-      story_continuation_story_id: storyId,
-      story_continuation_type: continuationType,
-      story_continuation_custom_prompt: customPrompt,
-      story_continuation_content: {}, // This will be updated later with the actual continuation content
-    });
+    const { error: continuationError } = await supabase
+      .from("story_continuations")
+      .insert({
+        story_continuation_story_id: storyId,
+        story_continuation_type: continuationType,
+        story_continuation_custom_prompt: customPrompt,
+        story_continuation_content: {}, // This will be updated later with the actual continuation content
+      });
 
     if (continuationError) throw continuationError;
 
