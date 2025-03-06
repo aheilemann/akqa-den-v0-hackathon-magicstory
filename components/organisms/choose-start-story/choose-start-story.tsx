@@ -2,9 +2,10 @@
 import { Card } from "@/components/ui/card";
 import { useCreateContext } from "@/context/CreateStoryContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
-const ChooseStartStory = () => {
+// Separate component that uses useSearchParams
+const StartStoryContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setStoryData } = useCreateContext();
@@ -60,6 +61,14 @@ const ChooseStartStory = () => {
         </div>
       </Card>
     </div>
+  );
+};
+
+const ChooseStartStory = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StartStoryContent />
+    </Suspense>
   );
 };
 
