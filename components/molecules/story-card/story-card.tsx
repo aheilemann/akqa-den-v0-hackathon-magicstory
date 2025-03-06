@@ -182,9 +182,9 @@ export function StoryCard({
           />
 
           {/* Emoji Badge - Updated background color for light mode */}
-          <div className="absolute top-4 left-4">
+          <div>
             {/* Card Content Container */}
-            <div className="relative w-full h-full rounded-[5px] overflow-hidden bg-card">
+            <div className="w-full h-full rounded-[5px] overflow-hidden bg-card">
               {/* Background Image with Gradient */}
               <div className="absolute inset-0">
                 <div
@@ -219,7 +219,7 @@ export function StoryCard({
                         onClick={handleShare}
                         size="icon"
                         variant={"outline"}
-                        className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
+                        className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm border-none"
                       >
                         <ShareIcon className="h-4 w-4" />
                       </Button>
@@ -238,9 +238,9 @@ export function StoryCard({
                         disabled={isDeleting}
                         size="icon"
                         variant={"outline"}
-                        className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
+                        className="rounded-full bg-white/70  h-9 w-9 backdrop-blur-sm border-none"
                       >
-                        <Trash2Icon className="h-4 w-4" />
+                        <Trash2Icon className="h-4 w-4 " />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
