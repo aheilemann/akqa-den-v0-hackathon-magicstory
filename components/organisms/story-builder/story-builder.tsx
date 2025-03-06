@@ -29,6 +29,30 @@ export function StoryBuilder() {
 
   const { imageData } = useCreateContext();
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut",
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
   const [isButtonsSticky, setIsButtonsSticky] = useState(false);
@@ -103,7 +127,7 @@ export function StoryBuilder() {
   }, [handleScroll]);
 
   return (
-    <div>
+    <motion.section variants={container}>
       {showStoryGenerator && (
         <div>
           <StoryGenerator
@@ -120,7 +144,7 @@ export function StoryBuilder() {
 
       {!showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
-          <div className="mb-8">
+          <motion.div variants={item} className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tighter">
@@ -142,7 +166,7 @@ export function StoryBuilder() {
                 }}
               />
             </div>
-          </div>
+          </motion.div>
           <AnimatePresence mode="wait">
             <motion.div
               ref={contentRef}
@@ -179,8 +203,9 @@ export function StoryBuilder() {
               )}
             </motion.div>
           </AnimatePresence>
-          <div
+          <motion.div
             ref={buttonsRef}
+            variants={item}
             className={clsx(
               "flex justify-between mt-8",
               isButtonsSticky
@@ -207,11 +232,11 @@ export function StoryBuilder() {
             >
               {currentStep === steps.length - 1 ? "Generate story!" : "Next"}
             </Button>
-          </div>
+          </motion.div>
           {isButtonsSticky && <div className="h-16" />}{" "}
         </Card>
       )}
-    </div>
+    </motion.section>
   );
 }
 
