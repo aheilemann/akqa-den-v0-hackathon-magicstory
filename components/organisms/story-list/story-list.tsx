@@ -104,7 +104,7 @@ export function StoryList({
       className="w-full"
     >
       {!hideHeadline && (
-        <h3 className="text-lg font-medium tracking-tight mb-4">
+        <h3 className="text-lg font-medium mb-4">
           Stories {"(" + stories.length + ")"}
         </h3>
       )}

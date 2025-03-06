@@ -59,7 +59,7 @@ export default function PricingContent({ initialTiers, currentSubscription }: Pr
       </div>
 
       <div className="text-center space-y-4">
-        <motion.h1 className="text-4xl font-medium tracking-tighter sm:text-5xl max-w-[20ch] text-center mx-auto" initial="hidden" animate="visible" variants={textVariants} custom={0}>
+        <motion.h1 className="text-4xl font-medium sm:text-5xl max-w-[20ch] text-center mx-auto" initial="hidden" animate="visible" variants={textVariants} custom={0}>
           Get started now and{" "}
           <motion.span initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.5 }}>
             create magical stories

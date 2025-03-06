@@ -109,7 +109,7 @@ export function StoryBuilder() {
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <div className="space-y-1">
-                <h2 className="text-2xl font-bold tracking-tighter">
+                <h2 className="text-2xl font-bold">
                   {currentStepData.title}
                 </h2>
                 <p className="text-muted-foreground">
@@ -166,7 +166,7 @@ export function StoryBuilder() {
           <div
             ref={buttonsRef}
             className={clsx(
-              "flex justify-between mt-8",
+              "flex justify-between mt-10",
               isButtonsSticky
                 ? "fixed bg-white bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
                 : "",

@@ -256,7 +256,7 @@ export function StoryCard({
 
               {/* Content */}
               <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-300 group-hover:translate-y-[-4px]">
-                <h4 className="font-medium text-2xl tracking-tight text-white">
+                <h4 className="font-medium text-2xl text-white">
                   {title}
                 </h4>
               </div>

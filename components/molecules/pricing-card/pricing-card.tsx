@@ -40,9 +40,9 @@ export function PricingCard({ name, price, description, features, isPremium = fa
           </div>
         )}
         <CardHeader>
-          <h3 className={cn("text-2xl font-medium tracking-tighter", isPremium && "text-purple-600 dark:text-purple-300")}>{name}</h3>
+          <h3 className={cn("text-2xl font-medium", isPremium && "text-purple-600 dark:text-purple-300")}>{name}</h3>
           <div className="flex items-baseline">
-            <span className={cn("text-4xl font-medium tracking-tighter", isPremium && "text-purple-600 dark:text-purple-300")}>{price}</span>
+            <span className={cn("text-4xl font-medium", isPremium && "text-purple-600 dark:text-purple-300")}>{price}</span>
             {price !== "Free" && <span className="text-sm text-muted-foreground ml-2">/month</span>}
           </div>
         </CardHeader>

@@ -88,10 +88,10 @@ const FeatureCard = ({ feature }: FeatureCardProps) => {
               <Icon className="h-4 w-4 text-black dark:text-neutral-400 transition-colors duration-300 ease-out group-hover:text-background group-hover:animate-shake" />
             </div>
             <div className="space-y-3">
-              <h3 className="pt-0.5 text-xl font-medium tracking-tighter md:text-2xl text-balance text-black dark:text-white">
+              <h3 className="pt-0.5 text-xl font-medium md:text-2xl text-balance text-black dark:text-white">
                 {feature.title}
               </h3>
-              <p className="font-sans text-sm md:text-base text-muted-foreground tracking-tight">
+              <p className="font-sans text-sm md:text-base text-muted-foreground">
                 {feature.description}
               </p>
             </div>
@@ -113,7 +113,7 @@ export const FeaturesShowcase = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl font-semibold sm:text-4xl md:text-5xl mb-4 tracking-tighter leading-tight">
+          <h2 className="text-3xl font-semibold sm:text-4xl md:text-5xl mb-4 leading-tight">
             Magical Features
           </h2>
           <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-lg mx-auto">

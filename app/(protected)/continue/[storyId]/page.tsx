@@ -132,7 +132,7 @@ export default function StoryContinuationPage({ params }: { params: Promise<{ st
     <Card className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <div className="space-y-1">
-          <h2 className="text-3xl font-semibold tracking-tight">Continue Your Story</h2>
+          <h2 className="text-3xl font-semibold">Continue Your Story</h2>
           <p className="text-muted-foreground text-md">Choose how you would like to continue your story</p>
         </div>
       </div>
