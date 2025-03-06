@@ -1,9 +1,34 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 const ChooseStartStory = () => {
   const router = useRouter();
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut",
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
 
   const handleStartWithDrawing = () => {
     router.push("/create/image");
@@ -14,7 +39,12 @@ const ChooseStartStory = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <motion.section
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="container mx-auto px-4 py-8"
+    >
       <Card className="max-w-4xl mx-auto p-6">
         <div className="mb-6">
           <div className="flex flex-col justify-between items-center mb-4">
@@ -27,7 +57,10 @@ const ChooseStartStory = () => {
           </div>
         </div>
 
-        <div className="flex flex-row w-fll gap-6 min-h-60">
+        <motion.div
+          variants={item}
+          className="flex flex-row w-fll gap-6 min-h-60"
+        >
           <Card
             className="flex justify-center items-center w-full cursor-pointer hover:bg-gray-100"
             onClick={handleStartWithDrawing}
@@ -45,9 +78,9 @@ const ChooseStartStory = () => {
               <h4 className="text-xl tracking-tighter">No, thanks</h4>
             </div>
           </Card>
-        </div>
+        </motion.div>
       </Card>
-    </div>
+    </motion.section>
   );
 };
 
