@@ -7,8 +7,7 @@ import { getUser } from "@/app/actions";
 
 const navigationLinks = [
   { href: "/create", label: "Create Story", isButton: true },
-  { href: "/pricing", label: "Pricing", isButton: false },
-  { href: "/shop", label: "Shop", isButton: false },
+  { href: "/pricing", label: "Pricing", isButton: false }
 ];
 
 export async function Navigation() {

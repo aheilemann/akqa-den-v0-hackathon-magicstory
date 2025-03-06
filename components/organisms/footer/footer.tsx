@@ -16,7 +16,6 @@ type FooterLinkGroup = {
 const productLinks: FooterLink[] = [
   { href: "/create", label: "Create Story" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
 ];
 
