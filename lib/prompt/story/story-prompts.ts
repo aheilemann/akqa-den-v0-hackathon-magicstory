@@ -11,6 +11,11 @@ Main Character: ${settings.character.name}
 ${settings.character.description}
 Character traits: ${settings.character.traits.join(", ")}
 
+Also use the these captions as an inspiration for the story:  ${
+  typeof settings.imageData !== "undefined" &&
+  settings.imageData?.map((image) => image.caption ?? image.caption).join(", ")
+}
+
 Theme: ${settings.theme.name}
 ${settings.theme.description}
 
@@ -38,4 +43,6 @@ Format the response as JSON with this structure:
 }
 
 Make the story engaging, age-appropriate, and positive in tone.
+
+
 `;

@@ -1,11 +1,7 @@
-import { StoryBuilder } from "@/components/organisms/story-builder";
+import { ChooseStartStory } from "@/components/organisms/choose-start-story";
 
 const CreatePage = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <StoryBuilder />
-    </div>
-  );
+  return <ChooseStartStory />;
 };
 
 export default CreatePage;

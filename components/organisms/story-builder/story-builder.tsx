@@ -11,18 +11,23 @@ import { steps } from "./story-builder.mocks";
 import { OptionsStatic } from "@/components/molecules/options-static";
 import clsx from "clsx";
 import { LimitReachedDialog } from "@/components/molecules/limit-reached-dialog";
+import { useCreateContext } from "@/context/CreateStoryContext";
+import { ImageData } from "@/types/create-story";
 
 type PartialStoryConfig = {
   targetAge?: Option;
   setting?: Option;
   character?: Option;
   theme?: Option;
+  imageData?: ImageData[];
 };
 
 export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
   const USE_STATIC_OPTIONS =
     process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
+
+  const { imageData } = useCreateContext();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
@@ -75,6 +80,12 @@ export function StoryBuilder() {
   };
 
   useEffect(() => {
+    if (!imageData) return;
+
+    settings.imageData = imageData;
+  }, [imageData]);
+
+  useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
     }
@@ -92,7 +103,7 @@ export function StoryBuilder() {
 
   return (
     <div>
-      {settings && showStoryGenerator ? (
+      {showStoryGenerator && (
         <div>
           <StoryGenerator
             settings={settings as StoryConfig}
@@ -104,7 +115,9 @@ export function StoryBuilder() {
             limit={limitValue}
           />
         </div>
-      ) : (
+      )}
+
+      {!showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -145,8 +158,9 @@ export function StoryBuilder() {
                     handleSelect(currentStepData.key, option)
                   }
                   selectedOption={
-                    settings[currentStepData.key as keyof PartialStoryConfig] ??
-                    null
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
                   }
                 />
               ) : (
@@ -156,8 +170,9 @@ export function StoryBuilder() {
                     handleSelect(currentStepData.key, option)
                   }
                   selectedOption={
-                    settings[currentStepData.key as keyof PartialStoryConfig] ??
-                    null
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
                   }
                 />
               )}

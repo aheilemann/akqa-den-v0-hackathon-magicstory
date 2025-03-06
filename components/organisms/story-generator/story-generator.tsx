@@ -12,6 +12,7 @@ import Image from "next/image";
 import { saveStory } from "@/app/actions";
 import { toast } from "sonner";
 import { IMAGE_PROMPT } from "@/lib/prompt";
+import { ImageData } from "@/types/create-story";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
@@ -39,7 +40,10 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       let results;
       if (!DISABLE_IMAGE_GENERATION) {
         const imagePromises = story.pages.map(
-          async (page: { imagePrompt: string }, index: number) => {
+          async (page: { imagePrompt?: string }, index: number) => {
+            if (typeof page.imagePrompt === "undefined") {
+              throw new Error("Image prompt is undefined.");
+            }
             const response = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },

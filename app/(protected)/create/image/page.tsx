@@ -2,6 +2,7 @@
 
 import type React from "react";
 
+import { useCreateContext } from "@/context/CreateStoryContext";
 import { useState, useCallback, useRef } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
@@ -17,12 +18,17 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ImageData } from "@/types/create-story";
 
 export default function ImageCaptioner() {
+  const router = useRouter();
+  const { setImageData } = useCreateContext();
+
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasGenratedImages, setHasGeneratedImages] = useState(false);
   const webcamRef = useRef<Webcam>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +98,13 @@ export default function ImageCaptioner() {
       console.error(err);
     } finally {
       setLoading(false);
+      setHasGeneratedImages(true);
     }
+  };
+
+  const handleCreateStory = () => {
+    setImageData(images);
+    router.push("/create/story");
   };
 
   return (
@@ -203,6 +215,11 @@ export default function ImageCaptioner() {
               </>
             )}
           </Button>
+          {hasGenratedImages && (
+            <Button className="w-full" onClick={handleCreateStory}>
+              Generate story!
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
