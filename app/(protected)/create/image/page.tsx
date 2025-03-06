@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +20,7 @@ import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ImageData } from "@/types/create-story";
+import { useWebcamDetection } from "@/hooks/useWebcamDetection";
 
 export default function ImageCaptioner() {
   const router = useRouter();
@@ -28,14 +29,15 @@ export default function ImageCaptioner() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasGenratedImages, setHasGeneratedImages] = useState(false);
   const webcamRef = useRef<Webcam>(null);
+  const hasWebcam = useWebcamDetection();
+  const [activeTab, setActiveTab] = useState<string>("upload");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file),
+      preview: URL.createObjectURL(file)
     }));
     setImages((prev) => [...prev, ...newImages].slice(0, 5));
   };
@@ -47,10 +49,10 @@ export default function ImageCaptioner() {
         .then((res) => res.blob())
         .then((blob) => {
           const file = new File([blob], "webcam-photo.jpg", {
-            type: "image/jpeg",
+            type: "image/jpeg"
           });
           setImages((prev) =>
-            [...prev, { file, preview: imageSrc }].slice(0, 5),
+            [...prev, { file, preview: imageSrc }].slice(0, 5)
           );
         });
     }
@@ -73,7 +75,7 @@ export default function ImageCaptioner() {
 
         const response = await fetch("/api/generate-caption", {
           method: "POST",
-          body: formData,
+          body: formData
         });
 
         if (!response.ok) {
@@ -90,21 +92,24 @@ export default function ImageCaptioner() {
       setImages((prev) =>
         prev.map((image, index) => ({
           ...image,
-          caption: captions[index],
-        })),
+          caption: captions[index]
+        }))
       );
     } catch (err) {
       setError("Error generating captions. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
-      setHasGeneratedImages(true);
+      setImageData(images);
+      router.push("/create/story");
     }
   };
 
-  const handleCreateStory = () => {
-    setImageData(images);
-    router.push("/create/story");
+  const handleTabChange = (value: string) => {
+    if (value === "webcam" && !hasWebcam) {
+      return;
+    }
+    setActiveTab(value);
   };
 
   return (
@@ -115,10 +120,16 @@ export default function ImageCaptioner() {
           <CardDescription>Upload or take up to 5 images</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs defaultValue="upload">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload">Upload Images</TabsTrigger>
-              <TabsTrigger value="webcam">Take Photo</TabsTrigger>
+              <TabsTrigger
+                value="webcam"
+                disabled={!hasWebcam}
+                className={!hasWebcam ? "opacity-50 cursor-not-allowed" : ""}
+              >
+                {!hasWebcam ? "No Webcam Available" : "Take Photo"}
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="upload">
               <div className="flex items-center justify-center">
@@ -139,7 +150,7 @@ export default function ImageCaptioner() {
                   <Input
                     id="image-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg, image/gif"
                     multiple
                     className="hidden"
                     onChange={handleImageChange}
@@ -149,17 +160,27 @@ export default function ImageCaptioner() {
             </TabsContent>
             <TabsContent value="webcam">
               <div className="flex flex-col items-center justify-center">
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  videoConstraints={{ facingMode: "user" }}
-                  className="w-full h-64 object-contain"
-                />
-                <Button onClick={capturePhoto} className="mt-4">
-                  <Camera className="mr-2 h-4 w-4" />
-                  Capture Photo
-                </Button>
+                {hasWebcam ? (
+                  <>
+                    <Webcam
+                      audio={false}
+                      ref={webcamRef}
+                      screenshotFormat="image/jpeg"
+                      videoConstraints={{ facingMode: "user" }}
+                      className="w-full h-64 object-contain"
+                    />
+                    <Button onClick={capturePhoto} className="mt-4">
+                      <Camera className="mr-2 h-4 w-4" />
+                      Capture Photo
+                    </Button>
+                  </>
+                ) : (
+                  <div className="w-full h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No webcam detected
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -215,11 +236,6 @@ export default function ImageCaptioner() {
               </>
             )}
           </Button>
-          {hasGenratedImages && (
-            <Button className="w-full" onClick={handleCreateStory}>
-              Generate story!
-            </Button>
-          )}
         </CardFooter>
       </Card>
     </div>
