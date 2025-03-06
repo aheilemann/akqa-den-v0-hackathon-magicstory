@@ -45,25 +45,52 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
               throw new Error("Image prompt is undefined.");
             }
 
-            const response = await fetch("/api/generate-image", {
+            // Step 1: Generate the image (Edge function - fast and globally distributed)
+            const generateResponse = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) })
             });
 
-            if (!response.ok)
+            if (!generateResponse.ok)
               throw new Error(`Failed to generate image ${index + 1}`);
 
-            const data = await response.json();
+            const generateData = await generateResponse.json();
 
-            // Log compression info if available
-            if (data.compressionRatio) {
-              console.log(
-                `Image ${index + 1}: ${data.originalSize}KB → ${data.compressedSize}KB (${data.compressionRatio}% reduction)`
-              );
+            // If the image needs compression, make a separate call
+            // This keeps the image generation endpoint lightweight and fast
+            if (generateData.needsCompression) {
+              try {
+                // Step 2: Compress the image (Node.js function - handles the heavy processing)
+                const compressResponse = await fetch("/api/compress-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    base64Image: `data:image/png;base64,${generateData.base64}`,
+                    quality: 75
+                  })
+                });
+
+                if (compressResponse.ok) {
+                  const compressData = await compressResponse.json();
+                  console.log(
+                    `Image ${index + 1}: ${compressData.originalSize}KB → ${compressData.compressedSize}KB (${compressData.compressionRatio}% reduction)`
+                  );
+                  return { index, imageUrl: compressData.base64 };
+                }
+              } catch (error) {
+                console.warn(
+                  `Compression failed for image ${index + 1}, using original`,
+                  error
+                );
+              }
             }
 
-            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
+            // Fall back to the original image if compression fails or isn't needed
+            return {
+              index,
+              imageUrl: `data:image/png;base64,${generateData.base64}`
+            };
           }
         );
 

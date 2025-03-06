@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { experimental_generateImage as generateImage } from "ai";
 
 export const preferredRegion = "fra1"; // Frankfurt
+export const runtime = "edge"; // Keep Edge runtime for faster global responses
 
 export async function POST(req: Request) {
   try {
@@ -34,50 +35,11 @@ export async function POST(req: Request) {
       throw new Error("No image data received from DALL-E");
     }
 
-    // Call the compression API from here
-    try {
-      const compressResponse = await fetch(
-        new URL("/api/compress-image", req.url).toString(),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            base64Image: `data:image/png;base64,${image.base64}`,
-            quality: 75
-          })
-        }
-      );
-
-      if (compressResponse.ok) {
-        // If compression succeeded, return the compressed image
-        const compressData = await compressResponse.json();
-
-        return new Response(
-          JSON.stringify({
-            base64: compressData.base64.replace(/^data:image\/\w+;base64,/, ""),
-            originalSize: compressData.originalSize,
-            compressedSize: compressData.compressedSize,
-            compressionRatio: compressData.compressionRatio
-          }),
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "public, max-age=31536000"
-            }
-          }
-        );
-      }
-    } catch (compressError) {
-      // Log compression error but continue with original image
-      console.error("Error compressing image:", compressError);
-    }
-
-    // Fallback to returning the original image if compression fails
+    // Return the original image - compression will be called separately
     return new Response(
       JSON.stringify({
-        base64: image.base64
+        base64: image.base64,
+        needsCompression: true
       }),
       {
         headers: {
