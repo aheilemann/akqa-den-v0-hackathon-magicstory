@@ -19,7 +19,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
     <section className="flex-1 w-full flex flex-col mt-12 mb-40 mx-auto items-center justify-center px-4 lg:px-0">
       <form className="flex flex-col max-w-lg w-full border border-border rounded-lg p-10">
         <div className="flex flex-col gap-2 items-center">
-          <h1 className="text-3xl tracking-tighter font-medium text-center">
+          <h1 className="text-3xl font-medium text-center">
             Sign in to your account
           </h1>
           <p className="text-md text-muted-foreground text-center">

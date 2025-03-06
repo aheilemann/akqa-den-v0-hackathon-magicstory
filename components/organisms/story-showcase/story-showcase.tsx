@@ -16,10 +16,10 @@ const StoryShowcase = async () => {
     <section className="py-16 px-6 2xl:px-0 max-w-7xl mx-auto w-full space-y-8">
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 lg:gap-2 w-full">
         <div>
-          <h3 className="text-2xl font-semibold tracking-tighter">
+          <h3 className="text-2xl font-semibold">
             Explore the stories
           </h3>
-          <p className="text-muted-foreground tracking-tight">
+          <p className="text-muted-foreground">
             Get inspired by the latest stories created by our users
           </p>
         </div>
@@ -39,7 +39,7 @@ const StoryShowcase = async () => {
         stories={stories}
         rowCount={{ sm: 2, md: 4, lg: 4 }}
         hideHeadline
-        showContinueButton={false}
+        showButtons={false}
       />
     </section>
   );
