@@ -60,11 +60,34 @@ export function StoryBuilder() {
   const [showStoryGenerator, setShowStoryGenerator] = useState(false);
   const [isLimitReachedOpen, setIsLimitReachedOpen] = useState(false);
   const [limitValue, setLimitValue] = useState(1);
+  const [shuffledOptions, setShuffledOptions] = useState<Option[]>([]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
 
   const currentStepData = steps[currentStep];
+
+  // Function to get random options
+  const getRandomOptions = useCallback((options: Option[]) => {
+    // If we have 3 or fewer options, return all of them
+    if (options.length <= 3) return options;
+
+    // Create a copy of the options array to shuffle
+    const shuffled = [...options].sort(() => 0.5 - Math.random());
+
+    return shuffled.slice(0, 6);
+  }, []);
+
+  // Shuffle options when currentStep changes
+  useEffect(() => {
+    if (currentStepData?.options) {
+      if (currentStepData.key === "target_age") {
+        setShuffledOptions(currentStepData.options);
+      } else {
+        setShuffledOptions(getRandomOptions(currentStepData.options));
+      }
+    }
+  }, [currentStep, getRandomOptions]);
 
   const handleSelect = (key: string, option: Option) => {
     setSettings((prev) => ({ ...prev, [key]: option }));
@@ -180,9 +203,9 @@ export function StoryBuilder() {
           </motion.div>
           <AnimatePresence mode="wait">
             <motion.div ref={contentRef} key={currentStep} variants={item}>
-              {USE_STATIC_OPTIONS ? (
+              {USE_STATIC_OPTIONS || currentStepData.key === "target_age" ? (
                 <OptionsStatic
-                  options={currentStepData.options}
+                  options={shuffledOptions}
                   onSelect={(option) =>
                     handleSelect(currentStepData.key, option)
                   }
