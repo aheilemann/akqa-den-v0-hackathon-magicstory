@@ -1,9 +1,11 @@
 "use client";
 
-import { Camera, Wand2, Image, Mic, Book } from "lucide-react";
+import { Camera, Wand2, Image as ImageIcon, Mic, Book } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/magicui/glowing-effect";
+import Image from "next/image";
+import { useState } from "react";
 
 const features = [
   {
@@ -12,6 +14,8 @@ const features = [
       "Take a picture of your favorite toy and watch as AI transforms it into a magical character in your very own personalized story. Perfect for bringing beloved playtime companions to life!",
     icon: Camera,
     area: "md:[grid-area:1/1/3/7] xl:[grid-area:1/1/3/5]",
+    image: "/assets/img/illustrated-fish.png",
+    hoverImage: "/assets/img/clown-fish.jpg",
   },
   {
     title: "Story Generation",
@@ -24,7 +28,7 @@ const features = [
     title: "Visual Magic",
     description:
       "Every story comes to life with beautiful, AI-generated illustrations that perfectly match your narrative. Create stunning visuals that capture children's imagination.",
-    icon: Image,
+    icon: ImageIcon,
     area: "md:[grid-area:2/7/3/13] xl:[grid-area:2/5/3/9]",
   },
   {
@@ -62,6 +66,8 @@ const cardVariants = {
 
 const FeatureCard = ({ feature }: FeatureCardProps) => {
   const Icon = feature.icon;
+  const isFirstFeature = feature.title === "Capture & Create";
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.li
@@ -73,6 +79,8 @@ const FeatureCard = ({ feature }: FeatureCardProps) => {
       whileHover="hover"
       animate="initial"
       variants={cardVariants}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
       <div className="relative h-full rounded-xl border border-foreground/10 hover:border-foreground/40 transition-colors duration-500 ease-out hover:shadow-lg hover:shadow-foreground/10 hover:bg-gradient-to-b hover:from-foreground/10 hover:to-background/10">
         <GlowingEffect
@@ -82,10 +90,42 @@ const FeatureCard = ({ feature }: FeatureCardProps) => {
           proximity={64}
           inactiveZone={0.01}
         />
-        <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-0.75 p-6">
-          <div className="relative flex flex-1 flex-col justify-between gap-3">
-            <div className="w-fit rounded-full border border-gray-600 p-4 transition-colors duration-300 ease-out group-hover:bg-foreground group-hover:border-background">
-              <Icon className="h-4 w-4 text-black dark:text-neutral-400 transition-colors duration-300 ease-out group-hover:text-background group-hover:animate-shake" />
+        <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-0.75 p-6 z-10">
+          {isFirstFeature && (
+            <div className="w-full flex justify-center mb-4">
+              <div className="relative">
+                {feature.image && (
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    width={400}
+                    height={200}
+                    className={cn(
+                      "object-contain rounded-xl transition-opacity duration-300",
+                      isHovered ? "opacity-0" : "opacity-100"
+                    )}
+                  />
+                )}
+                {feature.hoverImage && (
+                  <Image
+                    src={feature.hoverImage}
+                    alt={`${feature.title} hover`}
+                    width={400}
+                    height={200}
+                    className={cn(
+                      "object-contain rounded-xl absolute top-0 left-0 transition-opacity duration-300",
+                      isHovered ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          <div className="relative flex flex-1 flex-col justify-between gap-3 w-full">
+            <div className="flex justify-between items-start">
+              <div className="w-fit rounded-full border border-gray-600 p-4 transition-colors duration-300 ease-out group-hover:bg-foreground group-hover:border-background">
+                <Icon className="h-4 w-4 text-black dark:text-neutral-400 transition-colors duration-300 ease-out group-hover:text-background group-hover:animate-shake" />
+              </div>
             </div>
             <div className="space-y-3">
               <h3 className="pt-0.5 text-xl font-medium md:text-2xl text-balance text-black dark:text-white">

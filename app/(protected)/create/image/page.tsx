@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useCreateContext } from "@/context/CreateStoryContext";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,9 +29,16 @@ export default function ImageCaptioner() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [shouldNavigate, setShouldNavigate] = useState<boolean>(false);
   const webcamRef = useRef<Webcam>(null);
   const hasWebcam = useWebcamDetection();
   const [activeTab, setActiveTab] = useState<string>("upload");
+
+  useEffect(() => {
+    if (shouldNavigate) {
+      router.push("/create/story");
+    }
+  }, [shouldNavigate, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -88,19 +95,18 @@ export default function ImageCaptioner() {
 
       const captions = await Promise.all(captionPromises);
 
-      setImages((prev) =>
-        prev.map((image, index) => ({
-          ...image,
-          caption: captions[index],
-        }))
-      );
+      const imagesWithCaptions = images.map((image, index) => ({
+        ...image,
+        caption: captions[index]
+      }));
+      setImages(imagesWithCaptions);
+      setImageData(imagesWithCaptions);
     } catch (err) {
       setError("Error generating captions. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
-      setImageData(images);
-      router.push("/create/story");
+      setShouldNavigate(true); // Because of race condition with setting context
     }
   };
 
