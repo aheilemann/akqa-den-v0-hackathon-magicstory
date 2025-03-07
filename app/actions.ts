@@ -210,7 +210,7 @@ export async function fetchProfileData(
     }
 
     if (!user) {
-      console.log("No user found");
+      console.error("No user found");
       return null;
     }
 
@@ -253,13 +253,6 @@ export async function fetchProfileData(
       .eq("stories.story_user_id", user.id)
       .gte("story_continuation_created_at", today);
 
-    console.log("Usage data fetched:", {
-      userId: user.id,
-      date: today,
-      stories_generated: usageData?.stories_generated,
-      continuations: continuationCount,
-    });
-
     const storiesGenerated = usageData?.stories_generated || 0;
     const storyLimit = subscriptionData?.subscription_tier_story_limit;
     const continuationLimit =
@@ -288,7 +281,6 @@ export async function fetchProfileData(
       },
     };
 
-    console.log("Profile data:", profileData);
     return profileData;
   } catch (error) {
     console.error("Error fetching profile data:", error);
@@ -424,12 +416,6 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     const storiesGenerated = profileData?.stories_generated || 0;
     const storyLimit = subscriptionData?.subscription_tier_story_limit;
 
-    console.log("Current usage before save:", {
-      userId: user.id,
-      storiesGenerated,
-      storyLimit,
-    });
-
     // If storyLimit is null, it means unlimited
     // If storyLimit is a number, check if we've reached it
     if (storyLimit !== null && storiesGenerated >= storyLimit) {
@@ -499,10 +485,6 @@ export async function saveStory(story: Story, settings: StoryConfig) {
 
     // Increment usage after successful save
     const usageUpdated = await incrementStoryUsage(user.id);
-    console.log("Usage increment result:", {
-      userId: user.id,
-      success: usageUpdated,
-    });
 
     if (!usageUpdated) {
       console.error("Failed to increment usage for user:", user.id);

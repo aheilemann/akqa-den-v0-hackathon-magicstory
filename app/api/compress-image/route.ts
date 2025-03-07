@@ -34,12 +34,6 @@ async function compressImage(
     // Convert back to base64 with correct data URL prefix
     const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString("base64")}`;
 
-    const originalSize = getBase64Size(base64Image) / 1024; // KB
-    const compressedSize = getBase64Size(compressedBase64) / 1024; // KB
-    console.log(
-      `Compressed image: ${originalSize.toFixed(2)}KB → ${compressedSize.toFixed(2)}KB (${((1 - compressedSize / originalSize) * 100).toFixed(2)}% reduction)`
-    );
-
     return compressedBase64;
   } catch (error) {
     console.error("Error compressing image:", error);
@@ -54,12 +48,11 @@ export async function POST(req: Request) {
     if (!base64Image) {
       return new Response(JSON.stringify({ error: "No image data provided" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     const originalSize = getBase64Size(base64Image);
-    console.log("Original image size:", Math.round(originalSize / 1024), "KB");
 
     // Compress the image with the specified or default quality
     const compressedBase64 = await compressImage(base64Image, quality);
@@ -72,13 +65,13 @@ export async function POST(req: Request) {
         compressedSize: Math.round(compressedSize / 1024),
         compressionRatio: parseFloat(
           ((1 - compressedSize / originalSize) * 100).toFixed(2)
-        )
+        ),
       }),
       {
         headers: {
           "Content-Type": "application/json",
-          "Cache-Control": "public, max-age=31536000"
-        }
+          "Cache-Control": "public, max-age=31536000",
+        },
       }
     );
   } catch (error) {
@@ -86,11 +79,11 @@ export async function POST(req: Request) {
     return new Response(
       JSON.stringify({
         error: "Failed to compress image",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

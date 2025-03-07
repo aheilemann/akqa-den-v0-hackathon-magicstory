@@ -8,7 +8,7 @@ const StoryShowcase = async () => {
   const stories = await getStories();
 
   if (!stories.length) {
-    console.log("No stories found");
+    console.error("No stories found");
     return <></>;
   }
 
@@ -16,9 +16,7 @@ const StoryShowcase = async () => {
     <section className="py-16 px-6 2xl:px-0 max-w-7xl mx-auto w-full space-y-8">
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 lg:gap-2 w-full">
         <div>
-          <h3 className="text-2xl font-semibold">
-            Explore the stories
-          </h3>
+          <h3 className="text-2xl font-semibold">Explore the stories</h3>
           <p className="text-muted-foreground">
             Get inspired by the latest stories created by our users
           </p>

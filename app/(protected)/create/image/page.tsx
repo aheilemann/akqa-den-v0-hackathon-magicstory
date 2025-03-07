@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,7 +37,7 @@ export default function ImageCaptioner() {
     const files = Array.from(e.target.files || []);
     const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
     setImages((prev) => [...prev, ...newImages].slice(0, 5));
   };
@@ -49,7 +49,7 @@ export default function ImageCaptioner() {
         .then((res) => res.blob())
         .then((blob) => {
           const file = new File([blob], "webcam-photo.jpg", {
-            type: "image/jpeg"
+            type: "image/jpeg",
           });
           setImages((prev) =>
             [...prev, { file, preview: imageSrc }].slice(0, 5)
@@ -75,7 +75,7 @@ export default function ImageCaptioner() {
 
         const response = await fetch("/api/generate-caption", {
           method: "POST",
-          body: formData
+          body: formData,
         });
 
         if (!response.ok) {
@@ -87,12 +87,11 @@ export default function ImageCaptioner() {
       });
 
       const captions = await Promise.all(captionPromises);
-      console.log(captions);
 
       setImages((prev) =>
         prev.map((image, index) => ({
           ...image,
-          caption: captions[index]
+          caption: captions[index],
         }))
       );
     } catch (err) {

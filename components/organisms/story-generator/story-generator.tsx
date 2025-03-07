@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight, Save } from "lucide-react";
@@ -49,7 +48,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             const generateResponse = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) })
+              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
             });
 
             if (!generateResponse.ok)
@@ -67,15 +66,13 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     base64Image: `data:image/png;base64,${generateData.base64}`,
-                    quality: 75
-                  })
+                    quality: 75,
+                  }),
                 });
 
                 if (compressResponse.ok) {
                   const compressData = await compressResponse.json();
-                  console.log(
-                    `Image ${index + 1}: ${compressData.originalSize}KB → ${compressData.compressedSize}KB (${compressData.compressionRatio}% reduction)`
-                  );
+
                   return { index, imageUrl: compressData.base64 };
                 }
               } catch (error) {
@@ -89,7 +86,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             // Fall back to the original image if compression fails or isn't needed
             return {
               index,
-              imageUrl: `data:image/png;base64,${generateData.base64}`
+              imageUrl: `data:image/png;base64,${generateData.base64}`,
             };
           }
         );
@@ -98,7 +95,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       } else {
         results = [
           { index: 0, imageUrl: "Static - Test Image Text #1" },
-          { index: 1, imageUrl: "Static - Test Image Text #2" }
+          { index: 1, imageUrl: "Static - Test Image Text #2" },
         ];
       }
 
@@ -130,9 +127,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt }),
       });
 
       if (!response.ok) {
@@ -140,7 +137,6 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       }
 
       const storyData = await response.json();
-      console.log("Frontend story data:", storyData);
 
       setStory(storyData);
     } catch (err) {
