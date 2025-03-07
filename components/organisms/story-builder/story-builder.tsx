@@ -19,6 +19,7 @@ type PartialStoryConfig = {
   setting?: Option;
   character?: Option;
   theme?: Option;
+  idea?: string;
   imageData?: ImageData[];
 };
 
@@ -27,7 +28,7 @@ export function StoryBuilder() {
   const USE_STATIC_OPTIONS =
     process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
 
-  const { imageData } = useCreateContext();
+  const { imageData, storyData } = useCreateContext();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
@@ -80,16 +81,28 @@ export function StoryBuilder() {
   };
 
   useEffect(() => {
-    if (!imageData) return;
-
-    settings.imageData = imageData;
-  }, [imageData]);
-
-  useEffect(() => {
     if (USE_STATIC_STORY && !USE_STATIC_OPTIONS) {
       setSettings(staticStory);
     }
   }, [USE_STATIC_STORY]);
+
+  useEffect(() => {
+    if (imageData) {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        imageData: imageData
+      }));
+    }
+  }, [imageData]);
+
+  useEffect(() => {
+    if (storyData?.idea) {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        idea: storyData.idea
+      }));
+    }
+  }, [storyData?.idea]);
 
   useEffect(() => {
     handleScroll();
@@ -122,9 +135,7 @@ export function StoryBuilder() {
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <div className="space-y-1">
-                <h2 className="text-2xl font-bold">
-                  {currentStepData.title}
-                </h2>
+                <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
                 <p className="text-muted-foreground">
                   {currentStepData.description}
                 </p>
@@ -137,7 +148,7 @@ export function StoryBuilder() {
               <div
                 className="bg-primary rounded-full h-2 transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / steps.length) * 100}%`,
+                  width: `${((currentStep + 1) / steps.length) * 100}%`
                 }}
               />
             </div>
@@ -184,7 +195,7 @@ export function StoryBuilder() {
               "flex justify-between mt-10",
               isButtonsSticky
                 ? "fixed bg-white bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
-                : "",
+                : ""
             )}
           >
             <Button

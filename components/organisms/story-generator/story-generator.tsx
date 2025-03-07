@@ -12,7 +12,7 @@ import Image from "next/image";
 import { saveStory } from "@/app/actions";
 import { toast } from "sonner";
 import { IMAGE_PROMPT } from "@/lib/prompt";
-import { ImageData } from "@/types/create-story";
+import { MagicalLoader } from "@/components/ui/magical-loader";
 
 interface StoryGeneratorProps {
   settings: StoryConfig;
@@ -44,23 +44,61 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             if (typeof page.imagePrompt === "undefined") {
               throw new Error("Image prompt is undefined.");
             }
-            const response = await fetch("/api/generate-image", {
+
+            // Step 1: Generate the image (Edge function - fast and globally distributed)
+            const generateResponse = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) })
             });
-            if (!response.ok)
+
+            if (!generateResponse.ok)
               throw new Error(`Failed to generate image ${index + 1}`);
-            const data = await response.json();
-            return { index, imageUrl: `data:image/png;base64,${data.base64}` };
-          },
+
+            const generateData = await generateResponse.json();
+
+            // If the image needs compression, make a separate call
+            // This keeps the image generation endpoint lightweight and fast
+            if (generateData.needsCompression) {
+              try {
+                // Step 2: Compress the image (Node.js function - handles the heavy processing)
+                const compressResponse = await fetch("/api/compress-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    base64Image: `data:image/png;base64,${generateData.base64}`,
+                    quality: 75
+                  })
+                });
+
+                if (compressResponse.ok) {
+                  const compressData = await compressResponse.json();
+                  console.log(
+                    `Image ${index + 1}: ${compressData.originalSize}KB → ${compressData.compressedSize}KB (${compressData.compressionRatio}% reduction)`
+                  );
+                  return { index, imageUrl: compressData.base64 };
+                }
+              } catch (error) {
+                console.warn(
+                  `Compression failed for image ${index + 1}, using original`,
+                  error
+                );
+              }
+            }
+
+            // Fall back to the original image if compression fails or isn't needed
+            return {
+              index,
+              imageUrl: `data:image/png;base64,${generateData.base64}`
+            };
+          }
         );
 
         results = await Promise.all(imagePromises);
       } else {
         results = [
           { index: 0, imageUrl: "Static - Test Image Text #1" },
-          { index: 1, imageUrl: "Static - Test Image Text #2" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" }
         ];
       }
 
@@ -71,7 +109,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
         results.forEach(
           ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
             newPages[index] = { ...newPages[index], imageUrl };
-          },
+          }
         );
         return { ...prev, pages: newPages };
       });
@@ -92,9 +130,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt })
       });
 
       if (!response.ok) {
@@ -150,21 +188,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
   }, [generateStory]);
 
   if (generatingStory) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col items-center gap-4"
-        >
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground">
-            Creating your magical story...
-          </p>
-        </motion.div>
-      </div>
-    );
+    return <MagicalLoader />;
   }
 
   if (error) {
@@ -219,10 +243,10 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
                 )}
               </div>
             ) : (
-              <div className="w-full h-full relative">
+              <div className="w-full h-full relative aspect-square">
                 <Skeleton className="absolute inset-0 rounded-lg" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <MagicalLoader title="" subtitle="" />
                 </div>
               </div>
             )}

@@ -1,9 +1,22 @@
 "use client";
 import { Card } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { useCreateContext } from "@/context/CreateStoryContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-const ChooseStartStory = () => {
+// Separate component that uses useSearchParams
+const StartStoryContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setStoryData } = useCreateContext();
+
+  // Effect to get the story idea from URL parameters and set it in context
+  useEffect(() => {
+    const storyIdeaFromURL = searchParams.get("idea");
+    if (storyIdeaFromURL) {
+      setStoryData({ idea: storyIdeaFromURL });
+    }
+  }, [searchParams, setStoryData]);
 
   const handleStartWithDrawing = () => {
     router.push("/create/image");
@@ -48,6 +61,14 @@ const ChooseStartStory = () => {
         </div>
       </Card>
     </div>
+  );
+};
+
+const ChooseStartStory = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StartStoryContent />
+    </Suspense>
   );
 };
 
