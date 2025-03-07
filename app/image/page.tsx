@@ -79,7 +79,6 @@ export default function ImageCaptioner() {
       });
 
       const captions = await Promise.all(captionPromises);
-      console.log(captions);
 
       setImages((prev) =>
         prev.map((image, index) => ({

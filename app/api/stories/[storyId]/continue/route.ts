@@ -18,17 +18,25 @@ type ContinuationData = {
   summary: string;
 };
 
-async function uploadStoryImage(supabase: any, imageData: { base64: string; uint8Array: Uint8Array }, storyId: string, continuationId: string, index: number) {
+async function uploadStoryImage(
+  supabase: any,
+  imageData: { base64: string; uint8Array: Uint8Array },
+  storyId: string,
+  continuationId: string,
+  index: number
+) {
   try {
     // Convert base64 to blob
     const imageBlob = new Blob([imageData.uint8Array], { type: "image/png" });
 
     // Upload to Supabase storage in a continuation-specific folder
     const filePath = `${storyId}/continuations/${continuationId}/${index}.png`;
-    const { error: uploadError } = await supabase.storage.from("stories").upload(filePath, imageBlob, {
-      contentType: "image/png",
-      upsert: true,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from("stories")
+      .upload(filePath, imageBlob, {
+        contentType: "image/png",
+        upsert: true,
+      });
 
     if (uploadError) throw uploadError;
 
@@ -44,10 +52,11 @@ async function uploadStoryImage(supabase: any, imageData: { base64: string; uint
   }
 }
 
-async function generateStoryImage(prompt: string): Promise<{ base64: string; uint8Array: Uint8Array } | null> {
+async function generateStoryImage(
+  prompt: string
+): Promise<{ base64: string; uint8Array: Uint8Array } | null> {
   try {
     if (process.env.DISABLE_IMAGE_GENERATION === "true") {
-      console.log("Image generation is disabled");
       return null;
     }
 
@@ -68,9 +77,16 @@ async function generateStoryImage(prompt: string): Promise<{ base64: string; uin
   }
 }
 
-export async function POST(req: Request, context: { params: Promise<{ storyId: string }> }) {
+export async function POST(
+  req: Request,
+  context: { params: Promise<{ storyId: string }> }
+) {
   try {
-    const [{ type, customPrompt }, supabase, { storyId }] = await Promise.all([req.json(), createClient(), context.params]);
+    const [{ type, customPrompt }, supabase, { storyId }] = await Promise.all([
+      req.json(),
+      createClient(),
+      context.params,
+    ]);
 
     // Get current user and verify their continuation limit
     const {
@@ -80,17 +96,32 @@ export async function POST(req: Request, context: { params: Promise<{ storyId: s
 
     // Get user's subscription tier and current usage
     const today = new Date().toISOString().split("T")[0];
-    const [{ count: continuationCount }, { data: subscriptionData }] = await Promise.all([
-      supabase.from("story_continuations").select("story_continuation_story_id, stories!inner(story_user_id)", { count: "exact", head: true }).eq("stories.story_user_id", user.id).gte("story_continuation_created_at", today),
-      supabase
-        .from("subscription_tiers")
-        .select("subscription_tier_continuation_limit")
-        .eq("subscription_tier_id", user.user_metadata?.subscription_tier_id || "free")
-        .single(),
-    ]);
+    const [{ count: continuationCount }, { data: subscriptionData }] =
+      await Promise.all([
+        supabase
+          .from("story_continuations")
+          .select("story_continuation_story_id, stories!inner(story_user_id)", {
+            count: "exact",
+            head: true,
+          })
+          .eq("stories.story_user_id", user.id)
+          .gte("story_continuation_created_at", today),
+        supabase
+          .from("subscription_tiers")
+          .select("subscription_tier_continuation_limit")
+          .eq(
+            "subscription_tier_id",
+            user.user_metadata?.subscription_tier_id || "free"
+          )
+          .single(),
+      ]);
 
-    const continuationLimit = subscriptionData?.subscription_tier_continuation_limit;
-    if (continuationLimit !== null && (continuationCount || 0) >= continuationLimit) {
+    const continuationLimit =
+      subscriptionData?.subscription_tier_continuation_limit;
+    if (
+      continuationLimit !== null &&
+      (continuationCount || 0) >= continuationLimit
+    ) {
       return new Response(
         JSON.stringify({
           error: "Daily continuation limit reached",
@@ -105,7 +136,11 @@ export async function POST(req: Request, context: { params: Promise<{ storyId: s
     }
 
     // Get the original story
-    const { data: story, error: storyError } = await supabase.from("stories").select("*, story_content").eq("story_id", storyId).single();
+    const { data: story, error: storyError } = await supabase
+      .from("stories")
+      .select("*, story_content")
+      .eq("story_id", storyId)
+      .single();
 
     if (storyError) throw storyError;
 
@@ -298,7 +333,13 @@ REMEMBER: The first page should feel like simply turning to the next page in the
     const imagePromises = continuationData.pages.map(async (page, index) => {
       const imageData = await generateStoryImage(page.imagePrompt);
       if (!imageData) return null;
-      return uploadStoryImage(supabase, imageData, storyId, continuation.story_continuation_id, index);
+      return uploadStoryImage(
+        supabase,
+        imageData,
+        storyId,
+        continuation.story_continuation_id,
+        index
+      );
     });
 
     const imageUrls = await Promise.all(imagePromises);
@@ -321,14 +362,23 @@ REMEMBER: The first page should feel like simply turning to the next page in the
 
     if (updateError) throw updateError;
 
-    return new Response(JSON.stringify({ ...continuation, story_continuation_content: updatedContent }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        ...continuation,
+        story_continuation_content: updatedContent,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     console.error("Error generating story continuation:", error);
-    return new Response(JSON.stringify({ error: "Failed to generate story continuation" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Failed to generate story continuation" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
