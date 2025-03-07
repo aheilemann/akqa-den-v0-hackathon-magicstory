@@ -115,7 +115,7 @@ export function StoryBuilder() {
     if (imageData) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        imageData: imageData
+        imageData: imageData,
       }));
     }
   }, [imageData]);
@@ -124,7 +124,7 @@ export function StoryBuilder() {
     if (storyData?.idea) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        idea: storyData.idea
+        idea: storyData.idea,
       }));
     }
   }, [storyData?.idea]);
@@ -173,20 +173,13 @@ export function StoryBuilder() {
               <div
                 className="bg-primary rounded-full h-2 transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / steps.length) * 100}%`
+                  width: `${((currentStep + 1) / steps.length) * 100}%`,
                 }}
               />
             </div>
           </motion.div>
           <AnimatePresence mode="wait">
-            <motion.div
-              ref={contentRef}
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div ref={contentRef} key={currentStep} variants={item}>
               {USE_STATIC_OPTIONS ? (
                 <OptionsStatic
                   options={currentStepData.options}
@@ -221,7 +214,7 @@ export function StoryBuilder() {
               "flex justify-between mt-10",
               isButtonsSticky
                 ? "fixed bg-white bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
-                : ""
+                : "",
             )}
           >
             <Button
