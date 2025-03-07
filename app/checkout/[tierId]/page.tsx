@@ -6,17 +6,14 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
-import type { Database } from "@/lib/database.types";
+import type { Database, SubscriptionTierFeature } from "@/lib/database.types";
 import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
-type SubscriptionTier =
-  Database["public"]["Tables"]["subscription_tiers"]["Row"];
+type SubscriptionTier = Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
-export default function CheckoutPage({
-  params,
-}: {
-  params: Promise<{ tierId: string }>;
-}) {
+export default function CheckoutPage({ params }: { params: Promise<{ tierId: string }> }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [tier, setTier] = useState<SubscriptionTier | null>(null);
   const router = useRouter();
@@ -94,14 +91,10 @@ export default function CheckoutPage({
           <div className="flex justify-between items-center">
             <div>
               <h2 className="font-medium">{tier.subscription_tier_name}</h2>
-              <p className="text-sm text-muted-foreground">
-                {tier.subscription_tier_description}
-              </p>
+              <p className="text-sm text-muted-foreground">{tier.subscription_tier_description}</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-medium">
-                ${tier.subscription_tier_price.toFixed(2)}
-              </p>
+              <p className="text-xl font-medium">${tier.subscription_tier_price.toFixed(2)}</p>
               <p className="text-sm text-muted-foreground">/month</p>
             </div>
           </div>
@@ -109,12 +102,15 @@ export default function CheckoutPage({
           <div className="space-y-2">
             <p className="text-sm font-medium">Features included:</p>
             <ul className="space-y-2">
-              {(
-                tier.subscription_tier_features as Array<{ feature: string }>
-              )?.map(({ feature }, index) => (
+              {(tier.subscription_tier_features as SubscriptionTierFeature[])?.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2 text-sm">
                   <Sparkles className="h-4 w-4 flex-shrink-0 text-primary" />
-                  {feature}
+                  <span className={cn("text-sm", feature.comingSoon && "text-muted-foreground")}>{feature.feature}</span>
+                  {feature.comingSoon && (
+                    <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">
+                      Coming Soon
+                    </Badge>
+                  )}
                 </li>
               ))}
             </ul>
@@ -123,34 +119,16 @@ export default function CheckoutPage({
 
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg border border-yellow-200 dark:border-yellow-900">
-            <p className="text-sm text-yellow-800 dark:text-yellow-300">
-              Note: This is a demo! No actual charges will be made. Your wallet
-              is safe with us! Think of this as a magical subscription update.
-            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-300">Note: This is a demo! No actual charges will be made. Your wallet is safe with us! Think of this as a magical subscription update.</p>
           </div>
 
-          <button
-            onClick={handleApplePay}
-            disabled={isProcessing}
-            className={`w-full h-12 rounded-lg bg-black text-white font-medium flex items-center justify-center gap-2 transition-opacity ${isProcessing ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
-          >
+          <button onClick={handleApplePay} disabled={isProcessing} className={`w-full h-12 rounded-lg bg-black text-white font-medium flex items-center justify-center gap-2 transition-opacity ${isProcessing ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}>
             {isProcessing ? (
               <>Processing...</>
             ) : (
               <>
-                <svg
-                  data-testid="geist-icon"
-                  height="16"
-                  strokeLinejoin="round"
-                  viewBox="0 0 16 16"
-                  width="16"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M8 1L16 15H0L8 1Z"
-                    fill="currentColor"
-                  ></path>
+                <svg data-testid="geist-icon" height="16" strokeLinejoin="round" viewBox="0 0 16 16" width="16">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M8 1L16 15H0L8 1Z" fill="currentColor"></path>
                 </svg>
                 Pay with Vercel
               </>
@@ -159,11 +137,7 @@ export default function CheckoutPage({
         </div>
 
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            By clicking the button above, you acknowledge this is a demo and no
-            actual payment will be processed. Your subscription will be updated
-            for demonstration purposes only.
-          </p>
+          <p className="text-xs text-muted-foreground">By clicking the button above, you acknowledge this is a demo and no actual payment will be processed. Your subscription will be updated for demonstration purposes only.</p>
         </div>
       </Card>
     </div>

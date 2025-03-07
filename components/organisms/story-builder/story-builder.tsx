@@ -25,8 +25,7 @@ type PartialStoryConfig = {
 
 export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
-  const USE_STATIC_OPTIONS =
-    process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
+  const USE_STATIC_OPTIONS = process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
 
   const { imageData, storyData } = useCreateContext();
 
@@ -73,8 +72,7 @@ export function StoryBuilder() {
   const handleScroll = useCallback(() => {
     if (!contentRef.current || !buttonsRef.current) return;
 
-    const contentBottom =
-      contentRef.current.getBoundingClientRect().bottom + 50;
+    const contentBottom = contentRef.current.getBoundingClientRect().bottom + 50;
     const windowHeight = window.innerHeight;
 
     if (contentBottom < windowHeight) {
@@ -143,27 +141,18 @@ export function StoryBuilder() {
     <motion.section variants={container} initial="hidden" animate="show">
       {showStoryGenerator && (
         <div>
-          <StoryGenerator
-            settings={settings as StoryConfig}
-            onLimitReached={handleLimitReached}
-          />
-          <LimitReachedDialog
-            isOpen={isLimitReachedOpen}
-            onClose={() => setIsLimitReachedOpen(false)}
-            limit={limitValue}
-          />
+          <StoryGenerator settings={settings as StoryConfig} onLimitReached={handleLimitReached} />
+          <LimitReachedDialog isOpen={isLimitReachedOpen} onClose={() => setIsLimitReachedOpen(false)} limit={limitValue} />
         </div>
       )}
 
       {!showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
           <motion.div variants={item} className="mb-8">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
-                <p className="text-muted-foreground">
-                  {currentStepData.description}
-                </p>
+                <p className="text-muted-foreground">{currentStepData.description}</p>
               </div>
               <div className="text-sm text-muted-foreground">
                 Step {currentStep + 1} of {steps.length}
@@ -181,59 +170,21 @@ export function StoryBuilder() {
           <AnimatePresence mode="wait">
             <motion.div ref={contentRef} key={currentStep} variants={item}>
               {USE_STATIC_OPTIONS ? (
-                <OptionsStatic
-                  options={currentStepData.options}
-                  onSelect={(option) =>
-                    handleSelect(currentStepData.key, option)
-                  }
-                  selectedOption={
-                    (settings[
-                      currentStepData.key as keyof PartialStoryConfig
-                    ] as Option | null) ?? null
-                  }
-                />
+                <OptionsStatic options={currentStepData.options} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={(settings[currentStepData.key as keyof PartialStoryConfig] as Option | null) ?? null} />
               ) : (
-                <OptionsGenerator
-                  prompt={currentStepData.prompt}
-                  onSelect={(option) =>
-                    handleSelect(currentStepData.key, option)
-                  }
-                  selectedOption={
-                    (settings[
-                      currentStepData.key as keyof PartialStoryConfig
-                    ] as Option | null) ?? null
-                  }
-                />
+                <OptionsGenerator prompt={currentStepData.prompt} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={(settings[currentStepData.key as keyof PartialStoryConfig] as Option | null) ?? null} />
               )}
             </motion.div>
           </AnimatePresence>
           <motion.div
             ref={buttonsRef}
             variants={item}
-            className={clsx(
-              "flex justify-between mt-10",
-              isButtonsSticky
-                ? "fixed bg-white dark:bg-black bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
-                : "",
-            )}
+            className={clsx("flex justify-between mt-10", isButtonsSticky ? "fixed bg-white dark:bg-black bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto" : "")}
           >
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentStep === 0}
-            >
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
               Back
             </Button>
-            <Button
-              onClick={
-                currentStep === steps.length - 1
-                  ? handleGenerateStory
-                  : handleNext
-              }
-              disabled={
-                !settings[currentStepData.key as keyof PartialStoryConfig]
-              }
-            >
+            <Button onClick={currentStep === steps.length - 1 ? handleGenerateStory : handleNext} disabled={!settings[currentStepData.key as keyof PartialStoryConfig]}>
               {currentStep === steps.length - 1 ? "Generate story!" : "Next"}
             </Button>
           </motion.div>
