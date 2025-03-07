@@ -14,8 +14,8 @@ const features = [
       "Take a picture of your favorite toy and watch as AI transforms it into a magical character in your very own personalized story. Perfect for bringing beloved playtime companions to life!",
     icon: Camera,
     area: "md:[grid-area:1/1/3/7] xl:[grid-area:1/1/3/5]",
-    image: "/assets/img/clown-fish.jpg",
-    hoverImage: "/assets/img/illustrated-fish.png",
+    image: "/assets/img/illustrated-fish.png",
+    hoverImage: "/assets/img/clown-fish.jpg",
   },
   {
     title: "Story Generation",
