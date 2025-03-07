@@ -74,12 +74,10 @@ const Hero = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (storyIdea.trim()) {
+    if (storyIdea.trim() && typeof window !== "undefined") {
       localStorage.setItem("storyIdea", storyIdea.trim());
-      router.push(`/create?idea=${encodeURIComponent(storyIdea.trim())}`);
-    } else {
-      router.push(`/create`);
     }
+    router.push(`/create`);
   };
 
   return (
@@ -143,7 +141,13 @@ const Hero = () => {
           transition={{ duration: 0.5, delay: 0.8 }}
         >
           <Input
-            value={storyIdea || localStorage.getItem("storyIdea") || ""}
+            value={
+              storyIdea ||
+              (typeof window !== "undefined"
+                ? localStorage.getItem("storyIdea")
+                : null) ||
+              ""
+            }
             onChange={(e) => setStoryIdea(e.target.value)}
             placeholder={currentPlaceholder}
             className="h-12 text-md rounded-lg px-4 py-4 transition-shadow duration-500 ease-out shadow-[0_0_20px_rgba(0,0,0,0.05)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"
