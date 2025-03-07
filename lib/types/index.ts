@@ -1,2 +1,2 @@
-export * from "./story/story-types";
-export * from "./option/option-types";
+export * from "./story/story.types";
+export * from "./option/option.types";
