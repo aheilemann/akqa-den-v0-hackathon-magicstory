@@ -50,7 +50,7 @@ export function StoryList({
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const getGridClasses = () => {
-    const baseClasses = "grid gap-4";
+    const baseClasses = "grid gap-8";
     const smCols = `sm:grid-cols-${rowCount.sm}`;
     const mdCols = `md:grid-cols-${rowCount.md}`;
     const lgCols = `lg:grid-cols-${rowCount.lg}`;
@@ -82,9 +82,7 @@ export function StoryList({
           <span className="text-2xl">✨</span>
         </div>
         <h3 className="text-lg font-medium mb-2">No stories yet</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Create your first AI story and share it with the world
-        </p>
+        <p className="text-sm text-muted-foreground mb-6">Create your first AI story and share it with the world</p>
         <Link href="/create">
           <Button>
             <PlusIcon className="w-4 h-4 mr-2" />
@@ -96,18 +94,8 @@ export function StoryList({
   }
 
   return (
-    <motion.div
-      ref={ref}
-      variants={storiesContainer}
-      initial="hidden"
-      animate={isInView ? "show" : "hidden"}
-      className="w-full"
-    >
-      {!hideHeadline && (
-        <h3 className="text-lg font-medium mb-4">
-          Stories {"(" + stories.length + ")"}
-        </h3>
-      )}
+    <motion.div ref={ref} variants={storiesContainer} initial="hidden" animate={isInView ? "show" : "hidden"} className="w-full">
+      {!hideHeadline && <h3 className="text-lg font-medium mb-4">Stories {"(" + stories.length + ")"}</h3>}
       <div className={getGridClasses()}>
         {stories.map((story) => (
           <motion.div key={story.story_id} variants={storyItem}>
