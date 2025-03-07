@@ -56,7 +56,7 @@ export function PricingCard({ name, price, description, features, isPremium = fa
                 <Sparkles className={cn("h-4 w-4 flex-shrink-0", isPremium ? "text-purple-500" : "text-primary")} />
                 <span className="text-sm">{feature.feature}</span>
                 {feature.comingSoon && (
-                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 bg-purple-300">
+                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 bg-purple-300 dark:text-black">
                     Coming Soon
                   </Badge>
                 )}
