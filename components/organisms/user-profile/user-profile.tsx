@@ -76,7 +76,7 @@ export function UserProfile({ initialProfileData, isPersonalProfile = true, stor
         <div className="flex-1 space-y-3 md:space-y-2 items-center lg:items-start text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between w-full">
             <motion.div variants={item} className="flex items-center gap-2">
-              <h1 className="text-2xl font-medium tracking-tighter">{displayName || profileData.user.email?.split("@")[0] || "User"}</h1>
+              <h1 className="text-2xl font-medium">{displayName || profileData.user.email?.split("@")[0] || "User"}</h1>
               {isPersonalProfile && <ProfileEditor profileData={profileData} onProfileUpdate={refreshProfile} />}
             </motion.div>
             {isPersonalProfile && (

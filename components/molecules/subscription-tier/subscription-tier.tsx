@@ -66,7 +66,7 @@ export function SubscriptionTier({ subscription, usage }: SubscriptionTierProps)
       <div className="w-full space-y-6">
         <UsageBar icon={<BookOpen className="h-4 w-4" />} label="Story Generations" used={usage.used} total={subscription.subscription_tier_story_limit} />
 
-        <UsageBar icon={<BookPlus className="h-4 w-4" />} label="Story Continuations" used={usage.continuations.used} total={usage.continuations.total} />
+        <UsageBar icon={<BookPlus className="h-4 w-4" />} label="Story Continuations" used={usage.continuations.used} total={subscription.subscription_tier_continuation_limit} />
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ import {
 
 export type StoryCardProps = {
   story: Story;
-  showContinueButton?: boolean;
+  showButtons?: boolean;
 };
 
 const storyItem = {
@@ -43,7 +43,7 @@ const storyItem = {
 
 export function StoryCard({
   story,
-  showContinueButton = true,
+  showButtons: showButtons = true,
 }: StoryCardProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDeleting, setIsDeleting] = useState(false);
@@ -144,45 +144,47 @@ export function StoryCard({
   const title = story.story_title || content.title;
 
   return (
-    <Link href={`/story/${story.story_id}`}>
-      <motion.div
-        ref={cardRef}
-        variants={storyItem}
-        onMouseMove={handleMouseMove}
-        className="relative aspect-[1/1.5] rounded-md overflow-hidden group"
-      >
-        {/* Gradient Border - Updated opacity and colors */}
-        <div className="absolute inset-0 rounded-md p-[2px] bg-gradient-to-b from-white/30 to-white/10 dark:from-white/20 dark:to-white/[0.05]">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40 dark:from-black/20 dark:to-black/80 rounded-md" />
-        </div>
+    <>
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Story</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{title}"? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {/* Card Content Container */}
-        <div className="relative w-full h-full rounded-[5px] overflow-hidden bg-card">
-          {/* Background Image with Gradient */}
-          <div className="absolute inset-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-              style={{
-                backgroundImage: coverImage ? `url(${coverImage})` : undefined,
-                backgroundColor: "hsl(var(--muted))",
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
-          </div>
+      <div className="flex flex-col gap-2">
+        <Link href={`/story/${story.story_id}`}>
+          <motion.div
+            ref={cardRef}
+            variants={storyItem}
+            onMouseMove={handleMouseMove}
+            className="relative aspect-[9/16] rounded-md overflow-hidden group"
+          >
+            {/* Gradient Border - Updated opacity and colors */}
+            <div className="absolute inset-0 rounded-md p-[2px] bg-gradient-to-b from-white/30 to-white/10 dark:from-white/20 dark:to-white/[0.05]">
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40 dark:from-black/20 dark:to-black/80 rounded-md" />
+            </div>
 
-          {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/40" />
-
-          {/* Spotlight Effect */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-soft-light"
-            style={{
-              background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255,255,255,0.9), transparent 40%)`,
-            }}
-          />
-
-          {/* Emoji Badge - Updated background color for light mode */}
-          <div className="absolute top-4 left-4">
             {/* Card Content Container */}
             <div className="relative w-full h-full rounded-[5px] overflow-hidden bg-card">
               {/* Background Image with Gradient */}
@@ -211,66 +213,68 @@ export function StoryCard({
               />
 
               {/* Action Buttons */}
-              <div className="absolute top-4 right-4 z-10 flex gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={handleShare}
-                        size="icon"
-                        variant={"outline"}
-                        className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
-                      >
-                        <ShareIcon className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Share Story</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              {showButtons && (
+                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleShare}
+                          size="icon"
+                          variant={"outline"}
+                          className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm border-none"
+                        >
+                          <ShareIcon className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Share Story</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        size="icon"
-                        variant={"outline"}
-                        className="rounded-full bg-white/70 h-9 w-9 backdrop-blur-sm"
-                      >
-                        <Trash2Icon className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Delete Story</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          size="icon"
+                          variant={"outline"}
+                          className="rounded-full bg-white/70  h-9 w-9 backdrop-blur-sm border-none"
+                        >
+                          <Trash2Icon className="h-4 w-4 " />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete Story</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
 
               {/* Content */}
               <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-300 group-hover:translate-y-[-4px]">
-                <h4 className="font-medium text-2xl tracking-tight text-white">
+                <h4 className="font-medium text-2xl text-white">
                   {title}
                 </h4>
               </div>
             </div>
+          </motion.div>
+        </Link>
 
-            {showContinueButton && (
-              <Button
-                onClick={handleContinue}
-                variant="outline"
-                className="w-full gap-2"
-              >
-                <BookOpenIcon className="h-4 w-4" />
-                Continue Story
-              </Button>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </Link>
+        {showButtons && (
+          <Button
+            onClick={handleContinue}
+            variant="outline"
+            className="w-full gap-2"
+          >
+            <BookOpenIcon className="h-4 w-4" />
+            Continue Story
+          </Button>
+        )}
+      </div>
+    </>
   );
 }

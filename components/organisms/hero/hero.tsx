@@ -77,6 +77,8 @@ const Hero = () => {
     if (storyIdea.trim()) {
       localStorage.setItem("storyIdea", storyIdea.trim());
       router.push(`/create?idea=${encodeURIComponent(storyIdea.trim())}`);
+    } else {
+      router.push(`/create`);
     }
   };
 
@@ -104,7 +106,7 @@ const Hero = () => {
             </AnimatedShinyText>
           </div>
           <motion.h1
-            className="text-3xl font-semibold sm:text-6xl md:text-7xl mb-6 tracking-tighter leading-tight max-w-3xl text-center"
+            className="text-3xl font-semibold sm:text-6xl md:text-7xl mb-6 leading-tight max-w-3xl text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -122,7 +124,7 @@ const Hero = () => {
         </motion.div>
 
         <motion.p
-          className="text-base md:text-md text-muted-foreground max-w-xl text-center mb-8 tracking-tight"
+          className="text-base md:text-md text-muted-foreground max-w-xl text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
           transition={{ duration: 0.5, delay: 0.6 }}

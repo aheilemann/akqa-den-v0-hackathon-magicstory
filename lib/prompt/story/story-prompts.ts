@@ -11,10 +11,13 @@ Main Character: ${settings.character.name}
 ${settings.character.description}
 Character traits: ${settings.character.traits.join(", ")}
 
-Also use the these captions as an inspiration for the story:  ${
+IMPORTANT: The user has uploaded images for this story. These are their captions, which should be CENTRAL elements in your story:  ${
   typeof settings.imageData !== "undefined" &&
   settings.imageData?.map((image) => image.caption ?? image.caption).join(", ")
 }
+
+
+IMPORTANT: If the user has provided an idea for the story, use it as a starting point for the story: ${settings.idea}
 
 Theme: ${settings.theme.name}
 ${settings.theme.description}
@@ -24,7 +27,7 @@ Target Age: ${settings.target_age.name}: ${settings.target_age.description}
 Please create a story with the following structure:
 1. A title for the story
 2. ONLY 6 pages of content, where each page should:
-   - Have 2-3 sentences of story text appropriate for the target age ${settings.target_age.description} 
+   - Have 2-3 sentences of story text appropriate for the target age ${settings.target_age.description}
    - Include a detailed image prompt that matches the setting's visual style
 3. A target age for the story should be ${settings.target_age.description}
 4. The ending of the story should ALWAYS be open-ended.

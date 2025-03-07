@@ -123,7 +123,7 @@ export function StoryViewer({ story }: StoryViewerProps) {
 
           {/* Header */}
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">{currentSegment.title}</h1>
+            <h1 className="text-4xl font-bold mb-2">{currentSegment.title}</h1>
           </div>
         </div>
 

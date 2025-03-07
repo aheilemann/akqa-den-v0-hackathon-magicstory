@@ -22,7 +22,7 @@ const OptionCard = ({
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="h-[200px]"
+      // className="h-[200px]"
     >
       <Button
         variant="ghost"
@@ -36,7 +36,7 @@ const OptionCard = ({
         <Card className="border-0 w-full h-full">
           <CardHeader className="text-center pb-2">
             <div className="text-4xl mb-2">{option.emoji}</div>
-            <h3 className="font-semibold text-lg tracking-tighter">
+            <h3 className="font-semibold text-lg">
               {option.name}
             </h3>
           </CardHeader>

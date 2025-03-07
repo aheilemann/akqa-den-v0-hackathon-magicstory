@@ -17,6 +17,7 @@ export interface Story {
 }
 
 export interface StoryConfig {
+  idea?: string;
   imageData?: ImageData[];
   target_age: {
     name: string;
