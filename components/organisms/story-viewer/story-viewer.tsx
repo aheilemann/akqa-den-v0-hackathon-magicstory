@@ -57,8 +57,8 @@ export function StoryViewer({ story }: StoryViewerProps) {
       endPage: story.story_content.pages.length - 1,
       content: {
         summary: story.story_content.summary,
-        pages: story.story_content.pages,
-      },
+        pages: story.story_content.pages
+      }
     });
     allPages = [...story.story_content.pages];
     pageCount += story.story_content.pages.length;
@@ -74,8 +74,8 @@ export function StoryViewer({ story }: StoryViewerProps) {
         endPage: startPage + pages.length - 1,
         content: {
           summary: continuation.story_continuation_content.summary,
-          pages,
-        },
+          pages
+        }
       });
       allPages = [...allPages, ...pages];
       pageCount += pages.length;
@@ -86,7 +86,10 @@ export function StoryViewer({ story }: StoryViewerProps) {
 
   // Get current segment based on page number
   const getCurrentSegment = () => {
-    return segments.find((segment) => currentPage >= segment.startPage && currentPage <= segment.endPage)!;
+    return segments.find(
+      (segment) =>
+        currentPage >= segment.startPage && currentPage <= segment.endPage
+    )!;
   };
 
   const currentSegment = getCurrentSegment();
@@ -115,8 +118,20 @@ export function StoryViewer({ story }: StoryViewerProps) {
         <div className="mb-8 space-y-4">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {segments.map((segment, index) => (
-              <Button key={index} variant={currentPage >= segment.startPage && currentPage <= segment.endPage ? "default" : "outline"} onClick={() => handleJumpToSegment(segment.startPage)} className="whitespace-nowrap">
-                {segment.type === "original" ? "Original Story" : `Continuation ${index}`}
+              <Button
+                key={index}
+                variant={
+                  currentPage >= segment.startPage &&
+                  currentPage <= segment.endPage
+                    ? "default"
+                    : "outline"
+                }
+                onClick={() => handleJumpToSegment(segment.startPage)}
+                className="whitespace-nowrap"
+              >
+                {segment.type === "original"
+                  ? "Original Story"
+                  : `Continuation ${index}`}
               </Button>
             ))}
           </div>
@@ -129,35 +144,65 @@ export function StoryViewer({ story }: StoryViewerProps) {
 
         {/* Progress Bar */}
         <div className="w-full bg-muted rounded-full h-2 mb-8">
-          <div className="bg-primary rounded-full h-2 transition-all duration-300" style={{ width: `${((currentPage + 1) / allPages.length) * 100}%` }} />
+          <div
+            className="bg-primary rounded-full h-2 transition-all duration-300"
+            style={{ width: `${((currentPage + 1) / allPages.length) * 100}%` }}
+          />
         </div>
 
         {/* Story Page */}
         <Card className="p-6">
           <AnimatePresence mode="wait">
-            <motion.div key={currentPage} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+            <motion.div
+              key={currentPage}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Image */}
-                <div className="relative h-[400px] w-full">{currentPageData.imageUrl && <Image src={currentPageData.imageUrl} alt={`Story illustration ${currentPage + 1}`} fill className="object-cover rounded-lg" priority />}</div>
+                <div className="relative h-[400px] w-full">
+                  {currentPageData.imageUrl && (
+                    <Image
+                      src={currentPageData.imageUrl}
+                      alt={`Story illustration ${currentPage + 1}`}
+                      fill
+                      className="object-cover rounded-lg"
+                      priority
+                    />
+                  )}
+                </div>
 
                 {/* Text */}
-                <div className="flex items-center min-h-[400px]">
-                  <p className="text-lg leading-relaxed">{currentPageData.text}</p>
+                <div className="flex items-start md:items-center md:min-h-[400px]">
+                  <p className="text-lg leading-relaxed">
+                    {currentPageData.text}
+                  </p>
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
 
           {/* Navigation */}
-          <div className="flex justify-between items-center mt-8 flex-wrap gap-2">
-            <Button variant="outline" onClick={handlePrevious} disabled={currentPage === 0}>
+          <div className="flex flex-wrap justify-between items-center mt-8 gap-2">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentPage === 0}
+              className="order-1"
+            >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous Page
             </Button>
-            <span className="text-sm text-muted-foreground order-2 md:order-none">
+            <span className="text-sm text-muted-foreground w-full sm:w-auto text-center sm:text-left order-3 sm:order-2">
               Page {currentPage + 1} of {allPages.length}
             </span>
-            <Button onClick={handleNext} disabled={currentPage === allPages.length - 1}>
+            <Button
+              onClick={handleNext}
+              disabled={currentPage === allPages.length - 1}
+              className="order-2 sm:order-3"
+            >
               Next Page
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>

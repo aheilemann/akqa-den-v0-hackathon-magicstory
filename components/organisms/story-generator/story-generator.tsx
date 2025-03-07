@@ -48,7 +48,11 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             const generateResponse = await fetch("/api/generate-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
+              body: JSON.stringify({
+                prompt: IMAGE_PROMPT(
+                  `${page.imagePrompt}, the target age is ${story.targetAge}`
+                )
+              })
             });
 
             if (!generateResponse.ok)
