@@ -29,7 +29,7 @@ Target Age: ${settings.target_age.name}: ${settings.target_age.description}
 Please create a story with the following structure:
 1. A title for the story
 2. ONLY 6 pages of content, where each page should:
-   - Have 2-5 sentences of story text appropriate for the target age ${settings.target_age.name}. More sentences for older ages, 2 for around age 3 and 5 when above 12.
+   - Have 3-5 sentences of story text appropriate for the target age ${settings.target_age.name}. More sentences for older ages, 3 for around age 3 and 5 when above 12.
    - Include a detailed image prompt that matches the setting's visual style of Sir John Tenniel.
 3. A target age for the story should be ${settings.target_age.description}
 4. The ending of the story should ALWAYS be open-ended.
