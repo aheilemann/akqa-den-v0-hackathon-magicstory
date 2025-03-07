@@ -28,9 +28,9 @@ export const signUpAction = async (formData: FormData) => {
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
       data: {
-        subscription_tier_id: "f4307fbd-70b9-4265-95d3-600a2f1b339d", // Free tier ID
-      },
-    },
+        subscription_tier_id: "f4307fbd-70b9-4265-95d3-600a2f1b339d" // Free tier ID
+      }
+    }
   });
 
   if (error) {
@@ -52,7 +52,7 @@ export const signInAction = async (formData: FormData) => {
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password,
+    password
   });
 
   if (error) {
@@ -73,7 +73,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`,
+    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`
   });
 
   if (error) {
@@ -115,7 +115,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   }
 
   const { error } = await supabase.auth.updateUser({
-    password: password,
+    password: password
   });
 
   if (error) {
@@ -160,10 +160,10 @@ export const handleGoogleSignIn = async () => {
     options: {
       queryParams: {
         access_type: "offline",
-        prompt: "consent",
+        prompt: "consent"
       },
-      redirectTo: `${origin}/auth/callback`,
-    },
+      redirectTo: `${origin}/auth/callback`
+    }
   });
 
   if (error) {
@@ -204,7 +204,7 @@ export async function fetchProfileData(
       user = userData;
     } else {
       const {
-        data: { user: authUser },
+        data: { user: authUser }
       } = await supabase.auth.getUser();
       user = authUser;
     }
@@ -248,7 +248,7 @@ export async function fetchProfileData(
       .from("story_continuations")
       .select("story_continuation_story_id, stories!inner(story_user_id)", {
         count: "exact",
-        head: true,
+        head: true
       })
       .eq("stories.story_user_id", user.id)
       .gte("story_continuation_created_at", today);
@@ -257,7 +257,7 @@ export async function fetchProfileData(
       userId: user.id,
       date: today,
       stories_generated: usageData?.stories_generated,
-      continuations: continuationCount,
+      continuations: continuationCount
     });
 
     const storiesGenerated = usageData?.stories_generated || 0;
@@ -276,16 +276,16 @@ export async function fetchProfileData(
         subscription_tier_continuation_limit: 3,
         subscription_tier_features: ["Basic features"],
         subscription_tier_created_at: null,
-        subscription_tier_updated_at: null,
+        subscription_tier_updated_at: null
       },
       usage: {
         used: storiesGenerated,
         total: storyLimit,
         continuations: {
           used: continuationCount || 0,
-          total: continuationLimit,
-        },
-      },
+          total: continuationLimit
+        }
+      }
     };
 
     console.log("Profile data:", profileData);
@@ -303,8 +303,8 @@ export async function updateProfileDisplayName(displayName: string) {
     const { error } = await supabase.auth.updateUser({
       data: {
         display_name: displayName,
-        updated_at: new Date().toISOString(),
-      },
+        updated_at: new Date().toISOString()
+      }
     });
 
     if (error) throw error;
@@ -321,7 +321,7 @@ export async function uploadProfileAvatar(file: File) {
 
     // Get current user
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
     if (!user) throw new Error("No user found");
 
@@ -332,7 +332,7 @@ export async function uploadProfileAvatar(file: File) {
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, {
-        upsert: true,
+        upsert: true
       });
 
     if (uploadError) throw uploadError;
@@ -345,8 +345,8 @@ export async function uploadProfileAvatar(file: File) {
     const { error: updateError } = await supabase.auth.updateUser({
       data: {
         profile_img: data.publicUrl,
-        updated_at: new Date().toISOString(),
-      },
+        updated_at: new Date().toISOString()
+      }
     });
 
     if (updateError) throw updateError;
@@ -374,19 +374,19 @@ async function uploadStoryImage(
       .from("stories")
       .upload(filePath, imageBlob, {
         contentType: "image/png",
-        upsert: true,
+        upsert: true
       });
 
     if (uploadError) throw uploadError;
 
     // Get the public URL
     const {
-      data: { publicUrl },
+      data: { publicUrl }
     } = supabase.storage.from("stories").getPublicUrl(filePath);
 
     return {
       path: filePath,
-      url: publicUrl,
+      url: publicUrl
     };
   } catch (error) {
     console.error(`Error uploading image ${index}:`, error);
@@ -400,7 +400,7 @@ export async function saveStory(story: Story, settings: StoryConfig) {
 
     // Get current user
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -427,7 +427,7 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     console.log("Current usage before save:", {
       userId: user.id,
       storiesGenerated,
-      storyLimit,
+      storyLimit
     });
 
     // If storyLimit is null, it means unlimited
@@ -436,7 +436,7 @@ export async function saveStory(story: Story, settings: StoryConfig) {
       return {
         success: false,
         error: "LIMIT_REACHED",
-        limit: storyLimit,
+        limit: storyLimit
       };
     }
 
@@ -458,9 +458,9 @@ export async function saveStory(story: Story, settings: StoryConfig) {
           pages: story.pages.map((page) => ({
             text: page.text,
             imagePrompt: page.imagePrompt,
-            imageUrl: null,
-          })),
-        },
+            imageUrl: null
+          }))
+        }
       })
       .select()
       .single();
@@ -484,14 +484,14 @@ export async function saveStory(story: Story, settings: StoryConfig) {
       pages: story.pages.map((page, index) => ({
         text: page.text,
         imagePrompt: page.imagePrompt,
-        imageUrl: storyImages[index]?.url || null,
-      })),
+        imageUrl: storyImages[index]?.url || null
+      }))
     };
 
     const { error: updateError } = await supabase
       .from("stories")
       .update({
-        story_content: updatedContent,
+        story_content: updatedContent
       })
       .eq("story_id", storyData.story_id);
 
@@ -501,7 +501,7 @@ export async function saveStory(story: Story, settings: StoryConfig) {
     const usageUpdated = await incrementStoryUsage(user.id);
     console.log("Usage increment result:", {
       userId: user.id,
-      success: usageUpdated,
+      success: usageUpdated
     });
 
     if (!usageUpdated) {
@@ -555,7 +555,7 @@ export async function getStoryById(id: string) {
       .from("story_continuations")
       .select("*")
       .eq("story_continuation_story_id", id)
-      .order("story_continuation_created_at", { ascending: true }),
+      .order("story_continuation_created_at", { ascending: true })
   ]);
 
   if (!story) {
@@ -569,7 +569,7 @@ export async function getStoryById(id: string) {
     story_created_at: story.story_created_at,
     story_updated_at: story.story_updated_at,
     story_user_id: story.story_user_id,
-    continuations: continuationsResult.data || [],
+    continuations: continuationsResult.data || []
   };
 }
 
@@ -592,7 +592,7 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
         .from("user_daily_usage")
         .update({
           stories_generated: (existingRecord.stories_generated || 0) + 1,
-          updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .eq("user_id", userId)
         .eq("date", today);
@@ -605,7 +605,7 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
         .insert({
           user_id: userId,
           stories_generated: 1,
-          date: today,
+          date: today
         });
 
       if (insertError) throw insertError;
@@ -623,7 +623,7 @@ export async function getUser() {
     const supabase = await createClient();
     const {
       data: { user },
-      error,
+      error
     } = await supabase.auth.getUser();
 
     if (error) return null;
@@ -640,7 +640,7 @@ export async function deleteStory(storyId: string) {
 
     // Get current user
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -666,7 +666,7 @@ export async function updateUserSubscription(tierId: string) {
 
     // Get current user
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
 
     if (!user) {
@@ -676,8 +676,8 @@ export async function updateUserSubscription(tierId: string) {
     // Update user metadata with new subscription tier
     const { error } = await supabase.auth.updateUser({
       data: {
-        subscription_tier_id: tierId,
-      },
+        subscription_tier_id: tierId
+      }
     });
 
     if (error) throw error;
@@ -709,7 +709,7 @@ export async function incrementStoryContinuation(
 
     // Get current user
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -729,7 +729,7 @@ export async function incrementStoryContinuation(
       .from("story_continuations")
       .select("story_continuation_story_id, stories!inner(story_user_id)", {
         count: "exact",
-        head: true,
+        head: true
       })
       .eq("stories.story_user_id", user.id)
       .gte("story_continuation_created_at", today);
@@ -764,7 +764,7 @@ export async function incrementStoryContinuation(
         story_continuation_story_id: storyId,
         story_continuation_type: continuationType,
         story_continuation_custom_prompt: customPrompt,
-        story_continuation_content: {}, // This will be updated later with the actual continuation content
+        story_continuation_content: {} // This will be updated later with the actual continuation content
       });
 
     if (continuationError) throw continuationError;
