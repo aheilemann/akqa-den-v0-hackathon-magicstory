@@ -17,16 +17,28 @@ export function MobileMenu({ user, links }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden flex items-center gap-2">
-      {user && (
-        <Link href={`/profile`}>
-          <UserAvatar
-            user={user}
-            className="h-8 w-8 transition-transform hover:scale-105"
-          />
+    <div className="md:hidden flex items-center">
+      {user ? (
+        <Link
+          href={`/profile`}
+          className="flex items-center justify-center h-10 w-10"
+        >
+          <UserAvatar user={user} />
+        </Link>
+      ) : (
+        <Link
+          href="/sign-in"
+          className="flex items-center justify-center h-10 w-10"
+        >
+          <UserAvatar user={null} />
         </Link>
       )}
-      <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-center h-10 w-10 p-0 min-w-0 min-h-0"
+      >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 

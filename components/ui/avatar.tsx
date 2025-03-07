@@ -54,7 +54,10 @@ interface UserAvatarProps {
   className?: string;
 }
 
-export function UserAvatar({ user, className }: UserAvatarProps) {
+export function UserAvatar({
+  user,
+  className = "h-7 w-7 transition-transform hover:scale-105"
+}: UserAvatarProps) {
   const getFallbackInitial = () => {
     if (!user) return "";
     // Check for display_name first
@@ -75,7 +78,7 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
     user?.user_metadata?.profile_img ||
     user?.user_metadata?.avatar_url ||
     user?.user_metadata?.picture ||
-    "";
+    "/assets/img/placeholders/defaultAvatar.webp";
 
   // If no avatar from metadata, check for Google identity
   if (!avatarUrl) {
@@ -94,22 +97,20 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
 
   return (
     <Avatar className={className}>
-      {avatarUrl && (
-        <div className="relative aspect-square h-full w-full">
-          <Image
-            src={avatarUrl}
-            alt={
-              user?.user_metadata?.display_name ||
-              user?.user_metadata?.full_name ||
-              "User"
-            }
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 33vw"
-            priority
-          />
-        </div>
-      )}
+      <div className="relative aspect-square h-full w-full">
+        <Image
+          src={avatarUrl}
+          alt={
+            user?.user_metadata?.display_name ||
+            user?.user_metadata?.full_name ||
+            "User"
+          }
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority
+        />
+      </div>
       <AvatarFallback className="bg-muted">
         {getFallbackInitial()}
       </AvatarFallback>
