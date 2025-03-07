@@ -63,7 +63,7 @@ export function StoryList({
   }, []);
 
   const getGridClasses = () => {
-    const baseClasses = "grid gap-4";
+    const baseClasses = "grid gap-8";
     const smCols = `sm:grid-cols-${rowCount.sm}`;
     const mdCols = `md:grid-cols-${rowCount.md}`;
     const lgCols = `lg:grid-cols-${rowCount.lg}`;

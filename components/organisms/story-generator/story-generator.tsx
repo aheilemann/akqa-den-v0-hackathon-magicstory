@@ -70,8 +70,8 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     base64Image: `data:image/png;base64,${generateData.base64}`,
-                    quality: 75,
-                  }),
+                    quality: 75
+                  })
                 });
 
                 if (compressResponse.ok) {
@@ -90,7 +90,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
             // Fall back to the original image if compression fails or isn't needed
             return {
               index,
-              imageUrl: `data:image/png;base64,${generateData.base64}`,
+              imageUrl: `data:image/png;base64,${generateData.base64}`
             };
           }
         );
@@ -99,7 +99,7 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       } else {
         results = [
           { index: 0, imageUrl: "Static - Test Image Text #1" },
-          { index: 1, imageUrl: "Static - Test Image Text #2" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" }
         ];
       }
 
@@ -131,9 +131,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt })
       });
 
       if (!response.ok) {
@@ -159,7 +159,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
     try {
       const result = await saveStory(story, settings);
       if (result.success) {
-        toast.success("Story saved successfully!");
+        toast.success(
+          "Story saved successfully! Check your profile page to view it."
+        );
       } else {
         if (result.error === "LIMIT_REACHED" && onLimitReached) {
           onLimitReached(result.limit);
@@ -206,23 +208,6 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">{story.title}</h1>
-          <Button
-            onClick={handleSaveStory}
-            disabled={isSaving}
-            className="mt-4"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Story
-              </>
-            )}
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -260,25 +245,46 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-8">
+        <div className="grid grid-cols-3 gap-4 grid-rows-2 items-center lg:flex lg:justify-between lg:items-center mt-8">
           <Button
             variant="outline"
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 0}
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous Page
+            <span className="hidden md:block">Previous Page</span>
           </Button>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground w-fit m-auto lg:m-0">
             Page {currentPage + 1} of {story.pages.length}
           </p>
-          <Button
-            onClick={() => setCurrentPage((p) => p + 1)}
-            disabled={currentPage === story.pages.length - 1}
-          >
-            Next Page
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
+
+          <div className="contents md:flex md:gap-2 md:items-center">
+            <Button
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === story.pages.length - 1}
+            >
+              <span className="hidden md:block">Next Page</span>
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button
+              variant={"outline"}
+              onClick={handleSaveStory}
+              disabled={isSaving}
+              className="row-start-2 col-start-1 col-end-4"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Story
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     );

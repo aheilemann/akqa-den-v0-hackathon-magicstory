@@ -3,7 +3,7 @@
 import { PricingCard } from "@/components/molecules/pricing-card";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Database } from "@/lib/database.types";
+import { Database, SubscriptionTierFeature } from "@/lib/database.types";
 
 type SubscriptionTier = Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
@@ -106,7 +106,7 @@ export default function PricingContent({ initialTiers, currentSubscription }: Pr
               name={tier.subscription_tier_name}
               price={`$${tier.subscription_tier_price.toFixed(2)}`}
               description={tier.subscription_tier_description ?? ""}
-              features={(tier.subscription_tier_features as Array<{ feature: string }>)?.map(({ feature }) => feature) ?? []}
+              features={(tier.subscription_tier_features as SubscriptionTierFeature[]) ?? []}
               isPremium={index === 1}
               index={index}
               isCurrentPlan={currentSubscription?.subscription_tier_id === tier.subscription_tier_id}
