@@ -135,9 +135,9 @@ export type SubscriptionTier =
   Database["public"]["Tables"]["subscription_tiers"]["Row"];
 
 export async function fetchTiers() {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
+  try {
     const { data, error } = await supabase
       .from("subscription_tiers")
       .select("*")
@@ -190,9 +190,9 @@ export type ProfileData = {
 export async function fetchProfileData(
   id?: string
 ): Promise<ProfileData | null> {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
+  try {
     // Get user data - either by ID or current user
     let user;
     if (id) {
@@ -203,10 +203,7 @@ export async function fetchProfileData(
         .single();
       user = userData;
     } else {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-      user = authUser;
+      user = await getUser(); // Use our helper function
     }
 
     if (!user) {
@@ -289,9 +286,9 @@ export async function fetchProfileData(
 }
 
 export async function updateProfileDisplayName(displayName: string) {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
+  try {
     const { error } = await supabase.auth.updateUser({
       data: {
         display_name: displayName,
@@ -308,15 +305,12 @@ export async function updateProfileDisplayName(displayName: string) {
 }
 
 export async function uploadProfileAvatar(file: File) {
+  const supabase = await createClient();
+
+  // Get current user using the helper
+  const user = await getAuthenticatedUser();
+
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("No user found");
-
     const fileExt = file.name.split(".").pop();
     const filePath = `${user.id}.${fileExt}`;
 
@@ -387,15 +381,12 @@ async function uploadStoryImage(
 }
 
 export async function saveStory(story: Story, settings: StoryConfig) {
+  const supabase = await createClient();
+
+  // Get current user using the helper that ensures user is authenticated
+  const user = await getAuthenticatedUser();
+
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
-
     // Check if user has reached their daily limit
     const { data: profileData } = await supabase
       .from("user_daily_usage")
@@ -556,10 +547,10 @@ export async function getStoryById(id: string) {
 }
 
 export async function incrementStoryUsage(userId: string): Promise<boolean> {
-  try {
-    const supabase = await createClient();
-    const today = new Date().toISOString().split("T")[0];
+  const supabase = await createClient();
+  const today = new Date().toISOString().split("T")[0];
 
+  try {
     // Try to get existing record first
     const { data: existingRecord } = await supabase
       .from("user_daily_usage")
@@ -600,32 +591,48 @@ export async function incrementStoryUsage(userId: string): Promise<boolean> {
   }
 }
 
-export async function getUser() {
+export async function getUser(
+  throwOnError: boolean = false
+): Promise<User | null> {
+  const supabase = await createClient();
+
   try {
-    const supabase = await createClient();
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser();
 
-    if (error) return null;
+    if (error) {
+      if (throwOnError) throw new Error("User not authenticated");
+      return null;
+    }
+
+    if (!user && throwOnError) {
+      throw new Error("User not authenticated");
+    }
+
     return user;
   } catch (error) {
     console.error("Error in getUser:", error);
+    if (throwOnError) throw error;
     return null;
   }
 }
 
+// Helper that returns non-null user for functions that require authentication
+export async function getAuthenticatedUser(): Promise<User> {
+  const user = await getUser(true);
+  // If we get here, we know user is not null due to throwOnError
+  return user as User;
+}
+
 export async function deleteStory(storyId: string) {
+  const supabase = await createClient();
+
+  // Get current user using the helper that ensures user is authenticated
+  const user = await getAuthenticatedUser();
+
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
-
     // Delete the story record - the trigger will handle storage cleanup
     const { error } = await supabase
       .from("stories")
@@ -643,18 +650,12 @@ export async function deleteStory(storyId: string) {
 }
 
 export async function updateUserSubscription(tierId: string) {
+  const supabase = await createClient();
+
+  // Get current user using the helper
+  const _user = await getAuthenticatedUser();
+
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
     // Update user metadata with new subscription tier
     const { error } = await supabase.auth.updateUser({
       data: {
@@ -681,20 +682,18 @@ export async function getStories(limit: number = 4) {
   if (error) throw error;
   return data;
 }
+
 export async function incrementStoryContinuation(
   storyId: string,
   continuationType: string,
   customPrompt?: string
 ): Promise<boolean> {
+  const supabase = await createClient();
+
+  // Get current user using the helper
+  const user = await getAuthenticatedUser();
+
   try {
-    const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
-
     // Get the story to verify ownership
     const { data: storyData } = await supabase
       .from("stories")

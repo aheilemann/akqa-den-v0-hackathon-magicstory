@@ -29,16 +29,14 @@ const OptionCard = ({
         className={`w-full h-full p-0 transition-all duration-200 ${
           isSelected
             ? "bg-primary/5 shadow-[0_0_0_1px] shadow-primary"
-            : "hover:bg-accent"
+            : "hover:bg-accent shadow-[0_1px_8px_rgba(0,0,0,0.05)]"
         }`}
         onClick={() => onSelectAction(option)}
       >
         <Card className="border-0 w-full h-full">
           <CardHeader className="text-center pb-2">
             <div className="text-4xl mb-2">{option.emoji}</div>
-            <h3 className="font-semibold text-lg">
-              {option.name}
-            </h3>
+            <h3 className="font-semibold text-lg">{option.name}</h3>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground whitespace-normal">

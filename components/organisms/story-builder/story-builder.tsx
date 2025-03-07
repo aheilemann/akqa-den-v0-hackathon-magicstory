@@ -30,6 +30,30 @@ export function StoryBuilder() {
 
   const { imageData, storyData } = useCreateContext();
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut",
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<PartialStoryConfig>({});
   const [isButtonsSticky, setIsButtonsSticky] = useState(false);
@@ -49,7 +73,8 @@ export function StoryBuilder() {
   const handleScroll = useCallback(() => {
     if (!contentRef.current || !buttonsRef.current) return;
 
-    const contentBottom = contentRef.current.getBoundingClientRect().bottom;
+    const contentBottom =
+      contentRef.current.getBoundingClientRect().bottom + 50;
     const windowHeight = window.innerHeight;
 
     if (contentBottom < windowHeight) {
@@ -90,7 +115,7 @@ export function StoryBuilder() {
     if (imageData) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        imageData: imageData
+        imageData: imageData,
       }));
     }
   }, [imageData]);
@@ -99,7 +124,7 @@ export function StoryBuilder() {
     if (storyData?.idea) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        idea: storyData.idea
+        idea: storyData.idea,
       }));
     }
   }, [storyData?.idea]);
@@ -115,7 +140,7 @@ export function StoryBuilder() {
   }, [handleScroll]);
 
   return (
-    <div>
+    <motion.section variants={container} initial="hidden" animate="show">
       {showStoryGenerator && (
         <div>
           <StoryGenerator
@@ -132,7 +157,7 @@ export function StoryBuilder() {
 
       {!showStoryGenerator && (
         <Card className="max-w-4xl mx-auto p-6">
-          <div className="mb-8">
+          <motion.div variants={item} className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
@@ -148,20 +173,13 @@ export function StoryBuilder() {
               <div
                 className="bg-primary rounded-full h-2 transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / steps.length) * 100}%`
+                  width: `${((currentStep + 1) / steps.length) * 100}%`,
                 }}
               />
             </div>
-          </div>
+          </motion.div>
           <AnimatePresence mode="wait">
-            <motion.div
-              ref={contentRef}
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div ref={contentRef} key={currentStep} variants={item}>
               {USE_STATIC_OPTIONS ? (
                 <OptionsStatic
                   options={currentStepData.options}
@@ -189,13 +207,14 @@ export function StoryBuilder() {
               )}
             </motion.div>
           </AnimatePresence>
-          <div
+          <motion.div
             ref={buttonsRef}
+            variants={item}
             className={clsx(
               "flex justify-between mt-10",
               isButtonsSticky
                 ? "fixed bg-white bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
-                : ""
+                : "",
             )}
           >
             <Button
@@ -217,11 +236,11 @@ export function StoryBuilder() {
             >
               {currentStep === steps.length - 1 ? "Generate story!" : "Next"}
             </Button>
-          </div>
+          </motion.div>
           {isButtonsSticky && <div className="h-16" />}{" "}
         </Card>
       )}
-    </div>
+    </motion.section>
   );
 }
 
