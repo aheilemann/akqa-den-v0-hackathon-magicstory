@@ -14,18 +14,21 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: `You are a creative writing assistant. Generate exactly 3 story options.
+          content: `You are a creative writing assistant. Generate exactly 6 story options.
             Return ONLY a JSON array with this exact format:
             [
               {"name": "short title", "description": "brief description"},
               {"name": "short title", "description": "brief description"},
-              {"name": "short title", "description": "brief description"}
+              {"name": "short title", "description": "brief description"},
+              {"name": "short title", "description": "brief description"},
+              {"name": "short title", "description": "brief description"},
+              {"name": "short title", "description": "brief description"},
             ]`,
         },
         {
           role: "user",
           content: prompt,
-        },
+        }
       ],
       temperature: 0.7,
       maxTokens: 500,

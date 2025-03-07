@@ -1,5 +1,5 @@
-import { openai } from "@ai-sdk/openai";
 import { experimental_generateImage as generateImage } from "ai";
+import { replicate } from "@ai-sdk/replicate";
 
 export const preferredRegion = "fra1"; // Frankfurt
 export const runtime = "edge"; // Keep Edge runtime for faster global responses
@@ -16,23 +16,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate the image with DALL-E 3
     const { image } = await generateImage({
-      model: openai.image("dall-e-3"),
-      prompt,
-      size: "1024x1024",
-      providerOptions: {
-        openai: {
-          quality: "standard",
-          style: "natural",
-          response_format: "b64_json"
-        }
-      },
-      n: 1
+      model: replicate.image("recraft-ai/recraft-v3"),
+      prompt: prompt,
+      size: "1024x1024"
     });
 
     if (!image?.base64) {
-      throw new Error("No image data received from DALL-E");
+      throw new Error("No image data received");
     }
 
     // Return the original image - compression will be called separately

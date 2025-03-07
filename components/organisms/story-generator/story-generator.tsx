@@ -19,7 +19,8 @@ interface StoryGeneratorProps {
 }
 
 const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
-  const DISABLE_IMAGE_GENERATION = process.env.DISABLE_IMAGE_GENERATION === "true";
+  const DISABLE_IMAGE_GENERATION =
+    process.env.DISABLE_IMAGE_GENERATION === "true";
 
   const [error, setError] = useState<string | null>(null);
   const [story, setStory] = useState<Story | null>(null);
@@ -37,58 +38,68 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
     try {
       let results;
       if (!DISABLE_IMAGE_GENERATION) {
-        const imagePromises = story.pages.map(async (page: { imagePrompt?: string }, index: number) => {
-          if (typeof page.imagePrompt === "undefined") {
-            throw new Error("Image prompt is undefined.");
-          }
-
-          // Step 1: Generate the image (Edge function - fast and globally distributed)
-          const generateResponse = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: IMAGE_PROMPT(page.imagePrompt) }),
-          });
-
-          if (!generateResponse.ok) throw new Error(`Failed to generate image ${index + 1}`);
-
-          const generateData = await generateResponse.json();
-
-          // If the image needs compression, make a separate call
-          // This keeps the image generation endpoint lightweight and fast
-          if (generateData.needsCompression) {
-            try {
-              // Step 2: Compress the image (Node.js function - handles the heavy processing)
-              const compressResponse = await fetch("/api/compress-image", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  base64Image: `data:image/png;base64,${generateData.base64}`,
-                  quality: 75,
-                }),
-              });
-
-              if (compressResponse.ok) {
-                const compressData = await compressResponse.json();
-
-                return { index, imageUrl: compressData.base64 };
-              }
-            } catch (error) {
-              console.warn(`Compression failed for image ${index + 1}, using original`, error);
+        const imagePromises = story.pages.map(
+          async (page: { imagePrompt?: string }, index: number) => {
+            if (typeof page.imagePrompt === "undefined") {
+              throw new Error("Image prompt is undefined.");
             }
-          }
 
-          // Fall back to the original image if compression fails or isn't needed
-          return {
-            index,
-            imageUrl: `data:image/png;base64,${generateData.base64}`,
-          };
-        });
+            // Step 1: Generate the image (Edge function - fast and globally distributed)
+            const generateResponse = await fetch("/api/generate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt: IMAGE_PROMPT(
+                  `${page.imagePrompt}, the target age is ${story.targetAge}`
+                )
+              })
+            });
+
+            if (!generateResponse.ok)
+              throw new Error(`Failed to generate image ${index + 1}`);
+
+            const generateData = await generateResponse.json();
+
+            // If the image needs compression, make a separate call
+            // This keeps the image generation endpoint lightweight and fast
+            if (generateData.needsCompression) {
+              try {
+                // Step 2: Compress the image (Node.js function - handles the heavy processing)
+                const compressResponse = await fetch("/api/compress-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    base64Image: `data:image/png;base64,${generateData.base64}`,
+                    quality: 75
+                  })
+                });
+
+                if (compressResponse.ok) {
+                  const compressData = await compressResponse.json();
+
+                  return { index, imageUrl: compressData.base64 };
+                }
+              } catch (error) {
+                console.warn(
+                  `Compression failed for image ${index + 1}, using original`,
+                  error
+                );
+              }
+            }
+
+            // Fall back to the original image if compression fails or isn't needed
+            return {
+              index,
+              imageUrl: `data:image/png;base64,${generateData.base64}`
+            };
+          }
+        );
 
         results = await Promise.all(imagePromises);
       } else {
         results = [
           { index: 0, imageUrl: "Static - Test Image Text #1" },
-          { index: 1, imageUrl: "Static - Test Image Text #2" },
+          { index: 1, imageUrl: "Static - Test Image Text #2" }
         ];
       }
 
@@ -96,9 +107,11 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
         if (!prev) return prev;
         const newPages = [...prev.pages];
 
-        results.forEach(({ index, imageUrl }: { index: number; imageUrl: string }): void => {
-          newPages[index] = { ...newPages[index], imageUrl };
-        });
+        results.forEach(
+          ({ index, imageUrl }: { index: number; imageUrl: string }): void => {
+            newPages[index] = { ...newPages[index], imageUrl };
+          }
+        );
         return { ...prev, pages: newPages };
       });
     } catch (error) {
@@ -118,9 +131,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt })
       });
 
       if (!response.ok) {
@@ -146,7 +159,9 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
     try {
       const result = await saveStory(story, settings);
       if (result.success) {
-        toast.success("Story saved successfully! Check your profile page to view it.");
+        toast.success(
+          "Story saved successfully! Check your profile page to view it."
+        );
       } else {
         if (result.error === "LIMIT_REACHED" && onLimitReached) {
           onLimitReached(result.limit);
@@ -199,7 +214,19 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
           {/* Image side */}
           <div className="relative aspect-square w-full">
             {story.pages[currentPage].imageUrl ? (
-              <div>{DISABLE_IMAGE_GENERATION ? <p>{story.pages[currentPage].imageUrl}</p> : <Image src={story.pages[currentPage].imageUrl} alt={`Story illustration ${currentPage + 1}`} fill className="object-cover rounded-lg" priority />}</div>
+              <div>
+                {DISABLE_IMAGE_GENERATION ? (
+                  <p>{story.pages[currentPage].imageUrl}</p>
+                ) : (
+                  <Image
+                    src={story.pages[currentPage].imageUrl}
+                    alt={`Story illustration ${currentPage + 1}`}
+                    fill
+                    className="object-cover rounded-lg"
+                    priority
+                  />
+                )}
+              </div>
             ) : (
               <div className="w-full h-full relative aspect-square">
                 <Skeleton className="absolute inset-0 rounded-lg" />
@@ -212,12 +239,18 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
 
           {/* Text side */}
           <div className="flex flex-col justify-center">
-            <p className="text-lg leading-relaxed">{story.pages[currentPage].text}</p>
+            <p className="text-lg leading-relaxed">
+              {story.pages[currentPage].text}
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 grid-rows-2 items-center lg:flex lg:justify-between lg:items-center mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage((p) => p - 1)} disabled={currentPage === 0}>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={currentPage === 0}
+          >
             <ChevronLeft className="h-4 w-4 mr-2" />
             <span className="hidden md:block">Previous Page</span>
           </Button>
@@ -226,11 +259,19 @@ const StoryGenerator = ({ settings, onLimitReached }: StoryGeneratorProps) => {
           </p>
 
           <div className="contents md:flex md:gap-2 md:items-center">
-            <Button onClick={() => setCurrentPage((p) => p + 1)} disabled={currentPage === story.pages.length - 1}>
+            <Button
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === story.pages.length - 1}
+            >
               <span className="hidden md:block">Next Page</span>
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
-            <Button variant={"outline"} onClick={handleSaveStory} disabled={isSaving} className="row-start-2 col-start-1 col-end-4">
+            <Button
+              variant={"outline"}
+              onClick={handleSaveStory}
+              disabled={isSaving}
+              className="row-start-2 col-start-1 col-end-4"
+            >
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

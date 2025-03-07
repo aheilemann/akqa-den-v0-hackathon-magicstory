@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { openai } from "@ai-sdk/openai";
 import { generateText, experimental_generateImage as generateImage } from "ai";
+import { replicate } from "@ai-sdk/replicate";
 
 export const preferredRegion = "fra1"; // Frankfurt
 export const runtime = "edge";
@@ -35,14 +36,14 @@ async function uploadStoryImage(
       .from("stories")
       .upload(filePath, imageBlob, {
         contentType: "image/png",
-        upsert: true,
+        upsert: true
       });
 
     if (uploadError) throw uploadError;
 
     // Get the public URL
     const {
-      data: { publicUrl },
+      data: { publicUrl }
     } = supabase.storage.from("stories").getPublicUrl(filePath);
 
     return publicUrl;
@@ -60,17 +61,31 @@ async function generateStoryImage(
       return null;
     }
 
+    const imagePrompt = `Create a children's book illustration: ${prompt}. Style: Warm, friendly, and appropriate for young children. The image should be colorful, engaging, and suitable for a children's story book.`;
+
+    // Direct image generation using replicate model, exactly as in generate-image route
     const { image } = await generateImage({
-      model: openai.image("dall-e-3"),
-      prompt: `Create a children's book illustration: ${prompt}. Style: Warm, friendly, and appropriate for young children. The image should be colorful, engaging, and suitable for a children's story book.`,
-      size: "1024x1024",
-      providerOptions: {
-        openai: { quality: "standard", style: "natural" },
-      },
-      n: 1,
+      model: replicate.image("recraft-ai/recraft-v3"),
+      prompt: imagePrompt,
+      size: "1024x1024"
     });
 
-    return image;
+    if (!image?.base64) {
+      throw new Error("No image data received from image model");
+    }
+
+    // Convert base64 to uint8Array for storage
+    const base64Data = image.base64;
+    const binaryString = atob(base64Data);
+    const uint8Array = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      uint8Array[i] = binaryString.charCodeAt(i);
+    }
+
+    return {
+      base64: base64Data,
+      uint8Array: uint8Array
+    };
   } catch (error) {
     console.error("Error generating image:", error);
     return null;
@@ -85,12 +100,12 @@ export async function POST(
     const [{ type, customPrompt }, supabase, { storyId }] = await Promise.all([
       req.json(),
       createClient(),
-      context.params,
+      context.params
     ]);
 
     // Get current user and verify their continuation limit
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -102,7 +117,7 @@ export async function POST(
           .from("story_continuations")
           .select("story_continuation_story_id, stories!inner(story_user_id)", {
             count: "exact",
-            head: true,
+            head: true
           })
           .eq("stories.story_user_id", user.id)
           .gte("story_continuation_created_at", today),
@@ -113,7 +128,7 @@ export async function POST(
             "subscription_tier_id",
             user.user_metadata?.subscription_tier_id || "free"
           )
-          .single(),
+          .single()
       ]);
 
     const continuationLimit =
@@ -126,11 +141,11 @@ export async function POST(
         JSON.stringify({
           error: "Daily continuation limit reached",
           limit: continuationLimit,
-          used: continuationCount,
+          used: continuationCount
         }),
         {
           status: 403,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" }
         }
       );
     }
@@ -277,7 +292,7 @@ Create a DIRECT continuation that feels like the next page of the same book:
    - NO time jumps or scene changes
    - Continue the exact action/emotion/moment
    - Use the same narrative voice and pacing
-   
+
    Page 2:
    - Continue the flow established in page 1
    - Maintain consistent pacing and tone
@@ -304,7 +319,7 @@ Format as JSON:
 
 REMEMBER: The first page should feel like simply turning to the next page in the same book - no jarring transitions or time jumps.`,
       temperature: 0.7,
-      maxTokens: 2000,
+      maxTokens: 2000
     });
 
     const continuationData: ContinuationData = JSON.parse(response.text);
@@ -320,9 +335,9 @@ REMEMBER: The first page should feel like simply turning to the next page in the
           ...continuationData,
           pages: continuationData.pages.map((page) => ({
             ...page,
-            imageUrl: null,
-          })),
-        },
+            imageUrl: null
+          }))
+        }
       })
       .select()
       .single();
@@ -332,6 +347,7 @@ REMEMBER: The first page should feel like simply turning to the next page in the
     // Generate and upload images
     const imagePromises = continuationData.pages.map(async (page, index) => {
       const imageData = await generateStoryImage(page.imagePrompt);
+
       if (!imageData) return null;
       return uploadStoryImage(
         supabase,
@@ -349,14 +365,14 @@ REMEMBER: The first page should feel like simply turning to the next page in the
       ...continuationData,
       pages: continuationData.pages.map((page, index) => ({
         ...page,
-        imageUrl: imageUrls[index],
-      })),
+        imageUrl: imageUrls[index]
+      }))
     };
 
     const { error: updateError } = await supabase
       .from("story_continuations")
       .update({
-        story_continuation_content: updatedContent,
+        story_continuation_content: updatedContent
       })
       .eq("story_continuation_id", continuation.story_continuation_id);
 
@@ -365,10 +381,10 @@ REMEMBER: The first page should feel like simply turning to the next page in the
     return new Response(
       JSON.stringify({
         ...continuation,
-        story_continuation_content: updatedContent,
+        story_continuation_content: updatedContent
       }),
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" }
       }
     );
   } catch (error) {
@@ -377,7 +393,7 @@ REMEMBER: The first page should feel like simply turning to the next page in the
       JSON.stringify({ error: "Failed to generate story continuation" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" }
       }
     );
   }

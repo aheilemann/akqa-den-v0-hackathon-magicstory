@@ -25,7 +25,8 @@ type PartialStoryConfig = {
 
 export function StoryBuilder() {
   const USE_STATIC_STORY = process.env.NEXT_PUBLIC_USE_STATIC_STORY === "true";
-  const USE_STATIC_OPTIONS = process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
+  const USE_STATIC_OPTIONS =
+    process.env.NEXT_PUBLIC_USE_STATIC_OPTIONS === "true";
 
   const { imageData, storyData } = useCreateContext();
 
@@ -36,9 +37,9 @@ export function StoryBuilder() {
       transition: {
         duration: 0.3,
         ease: "easeOut",
-        staggerChildren: 0.15,
-      },
-    },
+        staggerChildren: 0.15
+      }
+    }
   };
 
   const item = {
@@ -48,9 +49,9 @@ export function StoryBuilder() {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut",
-      },
-    },
+        ease: "easeOut"
+      }
+    }
   };
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -59,11 +60,34 @@ export function StoryBuilder() {
   const [showStoryGenerator, setShowStoryGenerator] = useState(false);
   const [isLimitReachedOpen, setIsLimitReachedOpen] = useState(false);
   const [limitValue, setLimitValue] = useState(1);
+  const [shuffledOptions, setShuffledOptions] = useState<Option[]>([]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
 
   const currentStepData = steps[currentStep];
+
+  // Function to get random options
+  const getRandomOptions = useCallback((options: Option[]) => {
+    // If we have 3 or fewer options, return all of them
+    if (options.length <= 3) return options;
+
+    // Create a copy of the options array to shuffle
+    const shuffled = [...options].sort(() => 0.5 - Math.random());
+
+    return shuffled.slice(0, 6);
+  }, []);
+
+  // Shuffle options when currentStep changes
+  useEffect(() => {
+    if (currentStepData?.options) {
+      if (currentStepData.key === "target_age") {
+        setShuffledOptions(currentStepData.options);
+      } else {
+        setShuffledOptions(getRandomOptions(currentStepData.options));
+      }
+    }
+  }, [currentStep, getRandomOptions]);
 
   const handleSelect = (key: string, option: Option) => {
     setSettings((prev) => ({ ...prev, [key]: option }));
@@ -72,7 +96,8 @@ export function StoryBuilder() {
   const handleScroll = useCallback(() => {
     if (!contentRef.current || !buttonsRef.current) return;
 
-    const contentBottom = contentRef.current.getBoundingClientRect().bottom + 50;
+    const contentBottom =
+      contentRef.current.getBoundingClientRect().bottom + 50;
     const windowHeight = window.innerHeight;
 
     if (contentBottom < windowHeight) {
@@ -113,7 +138,7 @@ export function StoryBuilder() {
     if (imageData) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        imageData: imageData,
+        imageData: imageData
       }));
     }
   }, [imageData]);
@@ -122,7 +147,7 @@ export function StoryBuilder() {
     if (storyData?.idea) {
       setSettings((prevSettings) => ({
         ...prevSettings,
-        idea: storyData.idea,
+        idea: storyData.idea
       }));
     }
   }, [storyData?.idea]);
@@ -141,8 +166,15 @@ export function StoryBuilder() {
     <motion.section variants={container} initial="hidden" animate="show">
       {showStoryGenerator && (
         <div>
-          <StoryGenerator settings={settings as StoryConfig} onLimitReached={handleLimitReached} />
-          <LimitReachedDialog isOpen={isLimitReachedOpen} onClose={() => setIsLimitReachedOpen(false)} limit={limitValue} />
+          <StoryGenerator
+            settings={settings as StoryConfig}
+            onLimitReached={handleLimitReached}
+          />
+          <LimitReachedDialog
+            isOpen={isLimitReachedOpen}
+            onClose={() => setIsLimitReachedOpen(false)}
+            limit={limitValue}
+          />
         </div>
       )}
 
@@ -152,7 +184,9 @@ export function StoryBuilder() {
             <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
-                <p className="text-muted-foreground">{currentStepData.description}</p>
+                <p className="text-muted-foreground">
+                  {currentStepData.description}
+                </p>
               </div>
               <div className="text-sm text-muted-foreground">
                 Step {currentStep + 1} of {steps.length}
@@ -162,29 +196,67 @@ export function StoryBuilder() {
               <div
                 className="bg-primary rounded-full h-2 transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / steps.length) * 100}%`,
+                  width: `${((currentStep + 1) / steps.length) * 100}%`
                 }}
               />
             </div>
           </motion.div>
           <AnimatePresence mode="wait">
             <motion.div ref={contentRef} key={currentStep} variants={item}>
-              {USE_STATIC_OPTIONS ? (
-                <OptionsStatic options={currentStepData.options} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={(settings[currentStepData.key as keyof PartialStoryConfig] as Option | null) ?? null} />
+              {USE_STATIC_OPTIONS || currentStepData.key === "target_age" ? (
+                <OptionsStatic
+                  options={shuffledOptions}
+                  onSelect={(option) =>
+                    handleSelect(currentStepData.key, option)
+                  }
+                  selectedOption={
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
+                  }
+                />
               ) : (
-                <OptionsGenerator prompt={currentStepData.prompt} onSelect={(option) => handleSelect(currentStepData.key, option)} selectedOption={(settings[currentStepData.key as keyof PartialStoryConfig] as Option | null) ?? null} />
+                <OptionsGenerator
+                  prompt={currentStepData.prompt}
+                  onSelect={(option) =>
+                    handleSelect(currentStepData.key, option)
+                  }
+                  selectedOption={
+                    (settings[
+                      currentStepData.key as keyof PartialStoryConfig
+                    ] as Option | null) ?? null
+                  }
+                />
               )}
             </motion.div>
           </AnimatePresence>
           <motion.div
             ref={buttonsRef}
             variants={item}
-            className={clsx("flex justify-between mt-10", isButtonsSticky ? "fixed bg-white dark:bg-black bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto" : "")}
+            className={clsx(
+              "flex justify-between mt-10",
+              isButtonsSticky
+                ? "fixed bg-white dark:bg-black bottom-0 left-0 right-0 px-6 md:px-8 lg:px-12 py-4 md:py-6 lg:py-8 shadow-[0_0px_30px_rgba(0,0,0,0.10)] z-10 max-w-4xl mx-auto"
+                : ""
+            )}
           >
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+            >
               Back
             </Button>
-            <Button onClick={currentStep === steps.length - 1 ? handleGenerateStory : handleNext} disabled={!settings[currentStepData.key as keyof PartialStoryConfig]}>
+            <Button
+              onClick={
+                currentStep === steps.length - 1
+                  ? handleGenerateStory
+                  : handleNext
+              }
+              disabled={
+                !settings[currentStepData.key as keyof PartialStoryConfig]
+              }
+            >
               {currentStep === steps.length - 1 ? "Generate story!" : "Next"}
             </Button>
           </motion.div>

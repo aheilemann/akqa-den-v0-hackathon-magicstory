@@ -5,7 +5,7 @@ import { StoryCard } from "@/components/molecules/story-card";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export type Story = {
   story_id: string;
@@ -42,12 +42,25 @@ export function StoryList({
   rowCount = {
     sm: 2,
     md: 3,
-    lg: 3,
+    lg: 3
   },
-  showButtons = true,
+  showButtons = true
 }: StoryListProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.05 });
+  const [forceShow, setForceShow] = useState(false);
+
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      const timer = setTimeout(() => {
+        setForceShow(true);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const getGridClasses = () => {
     const baseClasses = "grid gap-8";
@@ -65,14 +78,14 @@ export function StoryList({
       transition: {
         duration: 0.5,
         staggerChildren: 0.25,
-        delayChildren: 0.1,
-      },
-    },
+        delayChildren: 0.1
+      }
+    }
   };
 
   const storyItem = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
+    show: { opacity: 1, y: 0 }
   };
 
   if (!stories || stories.length === 0) {
@@ -82,7 +95,9 @@ export function StoryList({
           <span className="text-2xl">✨</span>
         </div>
         <h3 className="text-lg font-medium mb-2">No stories yet</h3>
-        <p className="text-sm text-muted-foreground mb-6">Create your first AI story and share it with the world</p>
+        <p className="text-sm text-muted-foreground mb-6">
+          Create your first AI story and share it with the world
+        </p>
         <Link href="/create">
           <Button>
             <PlusIcon className="w-4 h-4 mr-2" />
@@ -94,8 +109,18 @@ export function StoryList({
   }
 
   return (
-    <motion.div ref={ref} variants={storiesContainer} initial="hidden" animate={isInView ? "show" : "hidden"} className="w-full">
-      {!hideHeadline && <h3 className="text-lg font-medium mb-4">Stories {"(" + stories.length + ")"}</h3>}
+    <motion.div
+      ref={ref}
+      variants={storiesContainer}
+      initial="hidden"
+      animate={isInView || forceShow ? "show" : "hidden"}
+      className="w-full"
+    >
+      {!hideHeadline && (
+        <h3 className="text-lg font-medium mb-4">
+          Stories {"(" + stories.length + ")"}
+        </h3>
+      )}
       <div className={getGridClasses()}>
         {stories.map((story) => (
           <motion.div key={story.story_id} variants={storyItem}>
