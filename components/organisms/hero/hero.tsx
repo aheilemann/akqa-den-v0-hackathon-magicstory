@@ -16,7 +16,7 @@ const placeholderTexts = [
   "A magical unicorn in a candy forest...",
   "A brave little robot learning to fly...",
   "A friendly dragon's first day at school...",
-  "An adventurous cat discovering a secret garden...",
+  "An adventurous cat discovering a secret garden..."
 ];
 
 const Hero = () => {
@@ -146,7 +146,7 @@ const Hero = () => {
             value={storyIdea || localStorage.getItem("storyIdea") || ""}
             onChange={(e) => setStoryIdea(e.target.value)}
             placeholder={currentPlaceholder}
-            className="h-12 text-sm rounded-lg px-4 py-4 transition-shadow duration-500 ease-out shadow-[0_0_20px_rgba(0,0,0,0.05)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+            className="h-12 text-md rounded-lg px-4 py-4 transition-shadow duration-500 ease-out shadow-[0_0_20px_rgba(0,0,0,0.05)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"
             maxLength={100}
             onMouseEnter={() => setShowEmoji(true)}
             onMouseLeave={() => setShowEmoji(false)}
@@ -158,19 +158,19 @@ const Hero = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{
                   opacity: 1,
-                  scale: 1,
+                  scale: 1
                 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{
                   duration: 0.15,
-                  ease: "easeOut",
+                  ease: "easeOut"
                 }}
                 className="pointer-events-none fixed z-50 flex flex-col items-center"
                 style={{
                   position: "fixed",
                   left: mousePosition.x,
                   top: mousePosition.y - 90,
-                  transform: "translateX(-50%)",
+                  transform: "translateX(-50%)"
                 }}
               >
                 <div className="relative">
@@ -185,7 +185,7 @@ const Hero = () => {
                         type: "spring",
                         stiffness: 400,
                         damping: 10,
-                        mass: 0.5,
+                        mass: 0.5
                       }}
                       className="text-xl relative z-10"
                     >
