@@ -143,7 +143,7 @@ const Hero = () => {
           transition={{ duration: 0.5, delay: 0.8 }}
         >
           <Input
-            value={storyIdea}
+            value={storyIdea || localStorage.getItem("storyIdea") || ""}
             onChange={(e) => setStoryIdea(e.target.value)}
             placeholder={currentPlaceholder}
             className="h-12 text-sm rounded-lg px-4 py-4 transition-shadow duration-500 ease-out shadow-[0_0_20px_rgba(0,0,0,0.05)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"

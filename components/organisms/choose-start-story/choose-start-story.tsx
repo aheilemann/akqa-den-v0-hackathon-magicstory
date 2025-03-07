@@ -11,11 +11,15 @@ const StartStoryContent = () => {
   const searchParams = useSearchParams();
   const { setStoryData } = useCreateContext();
 
-  // Effect to get the story idea from URL parameters and set it in context
+  // Effect to get the story idea from localStorage and set it in context
   useEffect(() => {
-    const storyIdeaFromURL = searchParams.get("idea");
-    if (storyIdeaFromURL) {
-      setStoryData({ idea: storyIdeaFromURL });
+    if (typeof window !== "undefined") {
+      const storyIdeaFromStorage = localStorage.getItem("storyIdea");
+      if (storyIdeaFromStorage) {
+        setStoryData({ idea: storyIdeaFromStorage });
+        // Clear from localStorage to avoid using it multiple times
+        localStorage.removeItem("storyIdea");
+      }
     }
   }, [searchParams, setStoryData]);
 
