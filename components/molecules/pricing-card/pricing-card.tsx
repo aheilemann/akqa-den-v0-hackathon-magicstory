@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { SubscriptionTierFeature } from "@/lib/database.types";
 
 export type PricingTierProps = {
   name: string;
   price: string;
   description: string;
-  features: string[];
+  features: SubscriptionTierFeature[];
   isPremium?: boolean;
   index: number;
   isCurrentPlan?: boolean;
@@ -52,7 +54,12 @@ export function PricingCard({ name, price, description, features, isPremium = fa
             {features.map((feature, index) => (
               <li key={index} className="flex items-center gap-2">
                 <Sparkles className={cn("h-4 w-4 flex-shrink-0", isPremium ? "text-purple-500" : "text-primary")} />
-                <span className="text-sm">{feature}</span>
+                <span className="text-sm">{feature.feature}</span>
+                {feature.comingSoon && (
+                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 bg-purple-300">
+                    Coming Soon
+                  </Badge>
+                )}
               </li>
             ))}
           </ul>
